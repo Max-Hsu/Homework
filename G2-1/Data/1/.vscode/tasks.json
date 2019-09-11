@@ -2,7 +2,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "g++.exe build active file",
+            "label": "for Windows",
             "command": "C:\\MinGW\\bin\\g++.exe",
             "args": [
                 "-g",
@@ -12,8 +12,22 @@
             ],
             "options": {
                 "cwd": "C:\\MinGW\\bin"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
             }
+        },
+        {
+            "type":"shell",
+            "label": "for Linux",
+            "command": "bash;g++",
+            "args": [
+                "-o",
+                "${fileBasenameNoExtension}"
+            ]
         }
     ],
     "version": "2.0.0"
+
 }
