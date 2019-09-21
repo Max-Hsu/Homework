@@ -94,7 +94,7 @@ class Tset{
             }
             cout<<"\n";
         }
-        friend ostream & operator << (ostream & output , const Tset set){
+        friend ostream & operator << (ostream & output , const Tset set){                                                   //for cout output string
             cout<<"{";
             for(int i=0;i<set.num;i++){
                 cout<<set.characters[i];
@@ -112,15 +112,15 @@ int main(){
     char set1[20];
     char set2[20];
     char in_check;
-    cin>>circulation;
-    for(int running = 0 ; running < circulation ; running++){
+    cin>>circulation;                                                       //first input for how many times that input will give
+    for(int running = 0 ; running < circulation ; running++){       
         for(int i=0;i<20;i++){
-            set1[i]='\0';
+            set1[i]='\0';                                                   //initiation for two input array
             set2[i]='\0';
         }
-        read(0,set1,20);
+        read(0,set1,20);                                                    //read until "\n"
         read(0,set2,20);
-        for(int i=0;i<20;i++){
+        for(int i=0;i<20;i++){                                              //transfer "\n" into "\0" and also record the array's length
             if(set1[i]=='\n'){
                 set1[i]='\0';
                 if(num1==-1){
@@ -134,25 +134,25 @@ int main(){
                 }
             }
         }
-        cin>>in_check;
-        cout<<"Test Case "<<running+1<<":\n";
-        Tset tset1(set1,num1);
-        cout<<"A: "<<tset1<<"\n";
-        Tset tset2(set2,num2);
-        cout<<"B: "<<tset2<<"\n";
-        Tset tset3;
-        tset3 = tset1+tset2;
+        cin>>in_check;                                                      //enter the checking case
+        cout<<"Test Case "<<running+1<<":\n";                               //output test case
+        Tset tset1(set1,num1);                                              //create instance tset1
+        cout<<"A: "<<tset1<<"\n";                                           //output tset1
+        Tset tset2(set2,num2);                                              //create instance tset2
+        cout<<"B: "<<tset2<<"\n";                                           //output tset2
+        Tset tset3;                                                         //create instance tset3
+        tset3 = tset1+tset2;                                                //assign to tset1+tset2
         cout<<"A+B :"<<tset3<<"\n";
-        Tset tset4;
-        tset4 = tset1*tset2;
+        Tset tset4;                                                         //create instance tset4
+        tset4 = tset1*tset2;                                                //assign to tset1*tset2
         cout<<"A*B :"<<tset4<<"\n";
-        Tset tset5;
-        tset5 = tset1-tset2;
+        Tset tset5;                                                         //create instance tset5
+        tset5 = tset1-tset2;                                                //assign to tset1-tset2
         cout<<"A-B :"<<tset5<<"\n";
-        Tset tset6;
-        tset6 = tset2-tset1;
+        Tset tset6;                                                         //create instance tset5
+        tset6 = tset2-tset1;                                                //assign to tset2-tset1
         cout<<"B-A :"<<tset6<<"\n";
-        if(tset1>=tset2){
+        if(tset1>=tset2){                                                   //using >= operator will return true or false
             cout<<"A contains B\n";
         }
         else{
@@ -165,7 +165,7 @@ int main(){
             cout<<"B does not contain A\n";
         }
 
-        Tset in_check_set(&in_check,1);
+        Tset in_check_set(&in_check,1);                                     //implementing thinking : see the checking character as another Tset instance and check with contains will give us same result
         if(tset1>=in_check_set){
             cout<<"'"<<in_check<<"' is in A\n";
         }
@@ -179,7 +179,7 @@ int main(){
             cout<<"'"<<in_check<<"' is not in B\n";
         }
         cout<<"\n";
-        num1=-1;
+        num1=-1;                                                            //reset the character array for next input
         num2=-1;
     }
 }
