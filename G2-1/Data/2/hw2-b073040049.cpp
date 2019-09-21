@@ -1,3 +1,8 @@
+/*
+Author:許家愷
+Date:September.13,2019
+Purpose:operator practice
+*/
 #include <iostream>
 #include <unistd.h>
 #include <algorithm>
