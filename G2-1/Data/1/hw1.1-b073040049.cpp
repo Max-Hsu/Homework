@@ -14,7 +14,7 @@ int main(){
             square[q][w]=-1;
         }
     }                                   //initiation the arrays with value -1
-    int xpos,ypos;                      //in order to caculate the current position
+    int xpos,ypos;                      //in order to calculate the current position
     for(int i = 3 ; i <= 9 ;i += 2 ){
         square[1][i/2+1] = 1;           //set the number one in the right place according to the instruction
         xpos = i/2+1;                   //saving the xposition
