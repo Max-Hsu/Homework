@@ -147,16 +147,16 @@ int main(){
         cout<<"B: "<<tset2<<"\n";                                           //output tset2
         Tset tset3;                                                         //create instance tset3
         tset3 = tset1+tset2;                                                //assign to tset1+tset2
-        cout<<"A+B :"<<tset3<<"\n";
+        cout<<"A+B: "<<tset3<<"\n";
         Tset tset4;                                                         //create instance tset4
         tset4 = tset1*tset2;                                                //assign to tset1*tset2
-        cout<<"A*B :"<<tset4<<"\n";
+        cout<<"A*B: "<<tset4<<"\n";
         Tset tset5;                                                         //create instance tset5
         tset5 = tset1-tset2;                                                //assign to tset1-tset2
-        cout<<"A-B :"<<tset5<<"\n";
+        cout<<"A-B: "<<tset5<<"\n";
         Tset tset6;                                                         //create instance tset5
         tset6 = tset2-tset1;                                                //assign to tset2-tset1
-        cout<<"B-A :"<<tset6<<"\n";
+        cout<<"B-A: "<<tset6<<"\n";
         if(tset1>=tset2){                                                   //using >= operator will return true or false
             cout<<"A contains B\n";
         }
