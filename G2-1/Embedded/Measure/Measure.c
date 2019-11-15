@@ -83,7 +83,7 @@ __irq void tc0 (void) {
   int i;
 
 	IOSET1 = 1<<16;
-	printf(menu);
+
 	IOCLR1 = 1<<16;
   if (measurement_interval)  {                 /* measurement done ?          */
     save_current_measurements ();              /* yes -> save measurements    */

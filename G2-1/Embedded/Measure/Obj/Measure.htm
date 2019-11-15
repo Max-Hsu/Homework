@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Obj\Measure.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Obj\Measure.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri Oct 25 16:14:37 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Thu Nov 07 22:32:01 2019
 <BR><P>
 <H3>Maximum Stack Usage =        256 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -90,7 +90,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> printfa.o(i.__0printf)
 </UL>
-<P><STRONG><a name="[16]"></a>init_serial</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, serial.o(.text))
+<P><STRONG><a name="[15]"></a>init_serial</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, serial.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -106,11 +106,10 @@ Global Symbols
 <P><STRONG><a name="[a]"></a>DefISR</STRONG> (ARM, 4 bytes, Stack size 0 bytes, measure.o(.text))
 <BR>[Address Reference Count : 1]<UL><LI> measure.o(.text)
 </UL>
-<P><STRONG><a name="[9]"></a>tc0</STRONG> (ARM, 420 bytes, Stack size 48 bytes, measure.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = tc0 &rArr; __2printf
+<P><STRONG><a name="[9]"></a>tc0</STRONG> (ARM, 412 bytes, Stack size 48 bytes, measure.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = tc0 &rArr; save_current_measurements
 </UL>
-<BR>[Calls]<UL><LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf (via Veneer)
-<LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;save_current_measurements (via Veneer)
+<BR>[Calls]<UL><LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;save_current_measurements (via Veneer)
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> measure.o(.text)
 </UL>
@@ -118,23 +117,23 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = main &rArr; set_time &rArr; __0sscanf &rArr; __vfscanf_char &rArr; __vfscanf &rArr; _scanf_int
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__c89printf
-<LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+<LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toupper
 <LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_time
 <LI><a href="#[1f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_interval
 <LI><a href="#[1d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;measure_display
 <LI><a href="#[18]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getline
-<LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_records
+<LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_records
 <LI><a href="#[1b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;read_index
 <LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getkey
-<LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;init_serial
+<LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;init_serial
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
 <P><STRONG><a name="[1d]"></a>measure_display</STRONG> (Thumb, 86 bytes, Stack size 48 bytes, mcommand.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 172<LI>Call Chain = measure_display &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; __aeabi_llsr
 </UL>
-<BR>[Calls]<UL><LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+<BR>[Calls]<UL><LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[21]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
 <LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 <LI><a href="#[23]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_scalbn
@@ -374,11 +373,10 @@ Global Symbols
 
 <P><STRONG><a name="[52]"></a>__1printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
 
-<P><STRONG><a name="[14]"></a>__2printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf))
+<P><STRONG><a name="[17]"></a>__2printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = __2printf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;measure_display
-<LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tc0 (via Veneer)
 <LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -475,7 +473,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup.o(RESET)
 </UL>
-<P><STRONG><a name="[15]"></a>save_current_measurements</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, measure.o(.text))
+<P><STRONG><a name="[14]"></a>save_current_measurements</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, measure.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = save_current_measurements
 </UL>
 <BR>[Called By]<UL><LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tc0 (via Veneer)
@@ -490,7 +488,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[17]"></a>clear_records</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, measure.o(.text))
+<P><STRONG><a name="[16]"></a>clear_records</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, measure.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
