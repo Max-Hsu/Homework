@@ -1,0 +1,10 @@
+;#<FEEDBACK># ARM Linker, 5.03 [Build 76]: Last Updated: Fri Nov 01 02:16:51 2013
+;VERSION 0.2
+;FILE getline.o
+;FILE mcommand.o
+;FILE measure.o
+;FILE retarget.o
+_sys_exit <= USED 0
+_ttywrch <= USED 0
+ferror <= USED 0
+;FILE serial.o

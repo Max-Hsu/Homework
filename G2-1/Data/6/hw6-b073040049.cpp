@@ -104,6 +104,7 @@ void adding(tree * &top , int add_value){                                       
             if(top->left == nullptr && top->right == nullptr && running == top){    //if it is the root and no child
                 delete top;                                                         //then delete it
                 top = nullptr;                                                      //and reset it
+                return;
             }
             delete_tree(running , before , direction , top);                        //or do the delete_tree function
 
