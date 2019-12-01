@@ -9,4 +9,4 @@ jobs:
 
     steps:
     - name: Run a one-line script
-      run: ls
+      run: echo Hello,Max-Hsu
