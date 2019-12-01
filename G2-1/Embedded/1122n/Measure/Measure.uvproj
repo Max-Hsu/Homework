@@ -10,6 +10,7 @@
       <TargetName>LPC2129 Simulator</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -449,16 +450,6 @@
               <FileName>Measure.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Measure.c</FilePath>
-            </File>
-            <File>
-              <FileName>Mcommand.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Mcommand.c</FilePath>
-            </File>
-            <File>
-              <FileName>Getline.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Getline.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -918,16 +909,6 @@
               <FileType>1</FileType>
               <FilePath>.\Measure.c</FilePath>
             </File>
-            <File>
-              <FileName>Mcommand.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Mcommand.c</FilePath>
-            </File>
-            <File>
-              <FileName>Getline.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Getline.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -1385,16 +1366,6 @@
               <FileName>Measure.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Measure.c</FilePath>
-            </File>
-            <File>
-              <FileName>Mcommand.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Mcommand.c</FilePath>
-            </File>
-            <File>
-              <FileName>Getline.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Getline.c</FilePath>
             </File>
           </Files>
         </Group>

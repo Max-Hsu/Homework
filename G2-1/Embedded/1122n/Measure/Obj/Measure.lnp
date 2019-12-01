@@ -3,11 +3,9 @@
 ".\obj\retarget.o"
 ".\obj\serial.o"
 ".\obj\measure.o"
-".\obj\mcommand.o"
-".\obj\getline.o"
 --library_type=microlib
 --feedback ".\Obj\Measure.fed" --feedback_image=none
 --strict --scatter ".\Obj\Measure.sct"
---summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list ".\Lst\Measure.map" -o .\Obj\Measure.axf

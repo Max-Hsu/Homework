@@ -12,19 +12,22 @@
             ],
             "options": {
                 "cwd": "C:\\MinGW\\bin"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
             }
         },
         {
             "type": "shell",
             "label": "for Linux",
-            "command":"bash",
+            "command": "bash",
             "args": [
                 "bash",
                 "g++",
                 "-o",
                 "${fileBasenameNoExtension}"
-            ],
-
+            ]
         }
     ],
     "version": "2.0.0"
