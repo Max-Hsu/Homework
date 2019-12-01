@@ -1,0 +1,7 @@
+xst -intstyle ise -ifn "C:/Users/user/Desktop/1118/exer1/mod1.xst" -ofn "C:/Users/user/Desktop/1118/exer1/mod1.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc7a100t-csg324-3 mod1.ngc mod1.ngd  
+map -intstyle ise -p xc7a100t-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -mt off -ir off -pr off -lc off -power off -o mod1_map.ncd mod1.ngd mod1.pcf 
+xst -intstyle ise -ifn "C:/Users/user/Desktop/1118/exer1/mod1.xst" -ofn "C:/Users/user/Desktop/1118/exer1/mod1.syr" 
+xst -intstyle ise -ifn "C:/Users/user/Desktop/1118/exer1/mod1.xst" -ofn "C:/Users/user/Desktop/1118/exer1/mod1.syr" 
+xst -intstyle ise -ifn "C:/Users/user/Desktop/1118/exer1/mod1.xst" -ofn "C:/Users/user/Desktop/1118/exer1/mod1.syr" 
+xst -intstyle ise -ifn "C:/Users/user/Desktop/1118/exer1/mod1.xst" -ofn "C:/Users/user/Desktop/1118/exer1/mod1.syr" 
