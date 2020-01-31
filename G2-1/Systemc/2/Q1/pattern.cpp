@@ -20,6 +20,11 @@ void pattern_gen::pattern(){
 	A = a;
 	B = b;
 	*/
+
+	cycle++;
+        if(cycle == CYCLE){
+        	sc_stop();
+	}
 }
 
 

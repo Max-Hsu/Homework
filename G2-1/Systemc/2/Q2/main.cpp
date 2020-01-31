@@ -20,10 +20,11 @@ int sc_main(int argc,char* argv[])
 	
 	clock(clk);
 	pattern(clk,A,B);
-	monitor(clk,A,B,Y);
 	nn_calc1(A,B,w5);
 	nn_calc2(A,B,w6);
 	nn_calc3(w5,w6,Y);
+	monitor(clk,A,B,Y);
+
 	
 	sc_start(500,SC_NS);
 	return 0;

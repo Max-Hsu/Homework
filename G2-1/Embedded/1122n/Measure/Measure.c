@@ -24,7 +24,7 @@ volatile int button_counter = 0;
 volatile int continous_time_button = 0;
 volatile int button_on = 0;
 volatile int off_timer = 0;
-volatile int led_cycle;
+volatile int led_cycle = -1;
 void wait (int timea)  {                        /* wait function */
   int  d;
   for (d = 0; d < timea*10; d++);           /* only to delay for LED flashes */
@@ -44,14 +44,24 @@ __irq void tc0 (void) {
   unsigned int val;
 	val = IOPIN0 & 0x10000;
 	led_cycle++;
-	if(led_cycle>101){
+	if(led_cycle>99){
 		led_cycle = 0;
 	}
-	if(button_counter>led_cycle){
-		IOSET1 = 1<<16;
+	if(led_cycle<50){
+		if(button_counter/2+button_counter%2>led_cycle){
+			IOSET1 = 1<<16;
+		}
+		else{
+			IOCLR1 = 1<<16;
+		}
 	}
 	else{
-		IOCLR1 = 1<<16;
+		if(button_counter/2>led_cycle-50){
+			IOSET1 = 1<<16;
+		}
+		else{
+			IOCLR1 = 1<<16;
+		}
 	}
 	if(val >0){
 		continous_time_button++;
