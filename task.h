@@ -1,5 +1,9 @@
 task:
 
+os homework
+understand tensorRt yolov3
+
+
 --------today---------
 understand architech detect
 contact :   https://www.facebook.com/dont.feed.monkey/
