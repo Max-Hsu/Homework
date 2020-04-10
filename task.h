@@ -1,8 +1,11 @@
 task:
 
-os homework
+os homework			//ok , but need to check
 understand tensorRt yolov3
+景點...				//wait for reply
+discuss monkey			//tomorrow
 
+read probability		//tomorrow
 
 --------today---------
 understand architech detect
