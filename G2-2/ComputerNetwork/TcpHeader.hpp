@@ -1,6 +1,11 @@
 #ifndef TCP_HEADER
 #define TCP_HEADER
 
+#define RTT 15
+#define MSS 1
+#define Threshold 64    *1000
+#define Buffer_Size 512 *1000
+
 struct TcpHEADER{
     uint16_t        Source_Port;
     uint16_t        Destination_Port;
@@ -27,5 +32,5 @@ template <class T>
 void charToBit(T & dest, const char * ptrOfChar,size_t offset);
 void charToTcp(struct TcpHEADER & header , char * ptrOfChar);
 int findArgument(const char * finding ,char ** theWholeArgument , const int argc);
-
+void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size);
 #endif

@@ -16,12 +16,15 @@ int main(int argc , char ** argv){
     int index_Port;
     int index_Option;
     int socketFd;
+    char buf[Buffer_Size];
     index_IP    =   findArgument("-i",argv,argc);
     index_Port  =   findArgument("-o",argv,argc);
     index_Option=   findArgument("-s",argv,argc);
 
     struct sockaddr_in client;
+    struct sockaddr_in server;
     memset(&client,'\0',sizeof(client));
+    memset(&server,'\0',sizeof(server));
 
     if(argc<5 || index_IP == -1 || index_Port == -1){
         cerr<<"Usage : ./client -i IP_Connect_to -o Port -s option\n";
@@ -38,9 +41,44 @@ int main(int argc , char ** argv){
     client.sin_port         =   htons(atoi(argv[index_Port]));
     client.sin_addr.s_addr  =   inet_addr(argv[index_IP]);
 
-    char hello[] = "hello\0";
-    sendto(socketFd, (const char *)hello, strlen(hello), 0, (const struct sockaddr *) &client, sizeof(client)); 
+    server.sin_family       =   AF_INET;
+    server.sin_port         =   htons(atoi(argv[index_Port]));
+    server.sin_addr.s_addr  =   htonl(INADDR_ANY);
 
+    int length = sizeof(client);
+    char hello[] = "hello\0";
+
+    char conversion[40];
+    memset(conversion,'\0',40);
+    /*
+    for(int i=0 ;i<40;i++){
+        printf("%d",int(conversion[i]));
+    }
+    printf("\n");
+    */
+    struct TcpHEADER AA;
+    AA.Source_Port = 12312;
+    AA.Destination_Port = 34234;
+
+    makePacket(AA,conversion,40);
+    for(int i=0 ;i<40;i++){
+        printf("%c",conversion[i]);
+    }
+    printf("\n");
+    //while(1){
+        if(sendto(socketFd, (const char *)hello, strlen(hello), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+            perror("send error!");
+        }
+        /*
+        if(recvfrom(socketFd, &buf, Buffer_Size, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
+            perror("recv error!");
+        }
+        else{
+            cout<<buf<<"\n";
+        }
+        */
+    //}
+    
     /*     char ooo[50];
     
     int fd = open("./hello",O_RDONLY);

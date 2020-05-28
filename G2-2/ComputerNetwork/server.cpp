@@ -14,7 +14,7 @@ int main(int argc , char ** argv){
     index_Port  =   findArgument("-o",argv,argc);
     index_Option=   findArgument("-s",argv,argc);
 
-    char buf[1024];
+    char buf[Buffer_Size];
 
     struct sockaddr_in server;
     struct sockaddr_in client;
@@ -41,13 +41,19 @@ int main(int argc , char ** argv){
         exit(1);
     }
     int length = sizeof(client);
+    char ok[] = "ok\0";
     while(1){
-        if ((recvfrom(socketFd, &buf, 1024, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
-            perror ("could not read datagram!!");
+        if ((recvfrom(socketFd, &buf, Buffer_Size, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
+            perror ("recv error!");
             continue;
         }
         else{
             cout<<buf<<"\n";
+        }
+
+        if (sendto(socketFd, (const char *)ok, sizeof(ok), 0, (struct sockaddr*)&client, length) < 0) {
+            perror("send error!");
+            continue;
         }
     }
 }

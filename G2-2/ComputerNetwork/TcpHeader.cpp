@@ -53,3 +53,8 @@ int findArgument(const char * finding ,char ** theWholeArgument , const int argc
     }
     return -1;
 }
+
+void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size){
+    memcpy(packetChar   ,&Header.Source_Port         ,sizeof(Header.Source_Port      )); //not working ...
+    memcpy(packetChar+2 ,&Header.Destination_Port    ,sizeof(Header.Destination_Port )); //please check!!!
+}
