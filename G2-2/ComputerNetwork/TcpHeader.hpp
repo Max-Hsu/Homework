@@ -32,5 +32,9 @@ template <class T>
 void charToBit(T & dest, const char * ptrOfChar,size_t offset);
 void charToTcp(struct TcpHEADER & header , char * ptrOfChar);
 int findArgument(const char * finding ,char ** theWholeArgument , const int argc);
+template <class T>
+void typeToChar(const T & data, char * destptrOfChar);
+template <class T>
+void bitToChar(const T & data, char * ptrOfChar,size_t offset);
 void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size);
 #endif

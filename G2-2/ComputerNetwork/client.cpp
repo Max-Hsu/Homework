@@ -57,18 +57,44 @@ int main(int argc , char ** argv){
     printf("\n");
     */
     struct TcpHEADER AA;
-    AA.Source_Port = 45613;
+    AA.Source_Port      = 45613;
     AA.Destination_Port = 65535;
-    cout<<AA.Source_Port<<"\n";
-    cout<<AA.Destination_Port<<"\n";
+    AA.Sequence_Number  = 4294967295;
+    AA.Ack_Number       = 1231;
+    AA.Data_Offset      = 12;
+    AA.NS               = 0;
+    AA.CWR              = 1;
+    AA.ACK              = 1;
+    AA.Window_Size      = 12318;
+    AA.Urgent_Pointer   = 454;
+
+
+    cout<<AA.Source_Port      <<"\n";
+    cout<<AA.Destination_Port <<"\n";
+    cout<<AA.Sequence_Number  <<"\n";
+    cout<<AA.Ack_Number       <<"\n";
+    cout<<int(AA.Data_Offset) <<"\n";
+    cout<<AA.NS               <<"\n";
+    cout<<AA.CWR              <<"\n";
+    cout<<AA.ACK              <<"\n";
+    cout<<AA.Window_Size      <<"\n";
+    cout<<AA.Urgent_Pointer   <<"\n";
     makePacket(AA,conversion,40);
 
-    printf("\n");
     
     charToTcp(AA , conversion);
-    cout<<AA.Source_Port<<"\n";
-    cout<<AA.Destination_Port<<"\n";
-
+    
+    cout<<AA.Source_Port      <<"\n";
+    cout<<AA.Destination_Port <<"\n";
+    cout<<AA.Sequence_Number  <<"\n";
+    cout<<AA.Ack_Number       <<"\n";
+    cout<<int(AA.Data_Offset) <<"\n";
+    cout<<AA.NS               <<"\n";
+    cout<<AA.CWR              <<"\n";
+    cout<<AA.ACK              <<"\n";
+    cout<<AA.Window_Size      <<"\n";
+    cout<<AA.Urgent_Pointer   <<"\n";
+    
 
     //while(1){
         if(sendto(socketFd, (const char *)hello, strlen(hello), 0, (const struct sockaddr *) &client, sizeof(client))<0){
