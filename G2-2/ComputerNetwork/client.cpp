@@ -57,14 +57,19 @@ int main(int argc , char ** argv){
     printf("\n");
     */
     struct TcpHEADER AA;
-    AA.Source_Port = 12312;
-    AA.Destination_Port = 34234;
-
+    AA.Source_Port = 45613;
+    AA.Destination_Port = 65535;
+    cout<<AA.Source_Port<<"\n";
+    cout<<AA.Destination_Port<<"\n";
     makePacket(AA,conversion,40);
-    for(int i=0 ;i<40;i++){
-        printf("%c",conversion[i]);
-    }
+
     printf("\n");
+    
+    charToTcp(AA , conversion);
+    cout<<AA.Source_Port<<"\n";
+    cout<<AA.Destination_Port<<"\n";
+
+
     //while(1){
         if(sendto(socketFd, (const char *)hello, strlen(hello), 0, (const struct sockaddr *) &client, sizeof(client))<0){
             perror("send error!");
