@@ -2,7 +2,7 @@
 #define TCP_HEADER
 
 #define RTT 15
-#define MSS 1
+#define MSS 1           *1000
 #define Threshold 64    *1000
 #define Buffer_Size 512 *1000
 
@@ -37,4 +37,5 @@ void typeToChar(const T & data, char * destptrOfChar);
 template <class T>
 void bitToChar(const T & data, char * ptrOfChar,size_t offset);
 void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size);
+void displayPacket(const struct TcpHEADER Header);
 #endif

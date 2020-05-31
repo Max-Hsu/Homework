@@ -12,11 +12,14 @@
 using namespace std;
 
 int main(int argc , char ** argv){
+    srand(time(NULL));
     int index_IP;
     int index_Port;
     int index_Option;
     int socketFd;
-    char buf[Buffer_Size];
+    uint16_t My_Source_Port = rand()%65536;
+    uint32_t My_Sequence_Number = (rand()%10000)+1;
+    char RecevingBUF[MSS];
     index_IP    =   findArgument("-i",argv,argc);
     index_Port  =   findArgument("-o",argv,argc);
     index_Option=   findArgument("-s",argv,argc);
@@ -56,83 +59,56 @@ int main(int argc , char ** argv){
     }
     printf("\n");
     */
-    struct TcpHEADER AA;
-    AA.Source_Port      = 45613;
-    AA.Destination_Port = 65535;
-    AA.Sequence_Number  = 4294967295;
-    AA.Ack_Number       = 1231;
-    AA.Data_Offset      = 12;
-    AA.NS               = 0;
-    AA.CWR              = 1;
-    AA.ACK              = 1;
-    AA.Window_Size      = 12318;
-    AA.Urgent_Pointer   = 454;
+    struct TcpHEADER SendindPacket;
+    struct TcpHEADER RecvingPacket;
+    //let's do three way handshake
 
-
-    cout<<AA.Source_Port      <<"\n";
-    cout<<AA.Destination_Port <<"\n";
-    cout<<AA.Sequence_Number  <<"\n";
-    cout<<AA.Ack_Number       <<"\n";
-    cout<<int(AA.Data_Offset) <<"\n";
-    cout<<AA.NS               <<"\n";
-    cout<<AA.CWR              <<"\n";
-    cout<<AA.ACK              <<"\n";
-    cout<<AA.Window_Size      <<"\n";
-    cout<<AA.Urgent_Pointer   <<"\n";
-    makePacket(AA,conversion,40);
-
-    
-    charToTcp(AA , conversion);
-    
-    cout<<AA.Source_Port      <<"\n";
-    cout<<AA.Destination_Port <<"\n";
-    cout<<AA.Sequence_Number  <<"\n";
-    cout<<AA.Ack_Number       <<"\n";
-    cout<<int(AA.Data_Offset) <<"\n";
-    cout<<AA.NS               <<"\n";
-    cout<<AA.CWR              <<"\n";
-    cout<<AA.ACK              <<"\n";
-    cout<<AA.Window_Size      <<"\n";
-    cout<<AA.Urgent_Pointer   <<"\n";
-    
-
-    //while(1){
-        if(sendto(socketFd, (const char *)hello, strlen(hello), 0, (const struct sockaddr *) &client, sizeof(client))<0){
-            perror("send error!");
-        }
-        /*
-        if(recvfrom(socketFd, &buf, Buffer_Size, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
-            perror("recv error!");
-        }
-        else{
-            cout<<buf<<"\n";
-        }
-        */
-    //}
-    
-    /*     char ooo[50];
-    
-    int fd = open("./hello",O_RDONLY);
-    read(fd , ooo ,20); */
-    /*
-    //so if we receive a packet , read it with char
-    //concat it and use bitset to separate?
-    for(int i = 0 ; i <20 ;i++){
-        //cout<<ooo[i];
-        bitset<8> aaa(ooo[i]);
-        cout<<aaa.to_string();
+    SendindPacket.Source_Port          =   My_Source_Port;
+    SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
+    SendindPacket.Sequence_Number      =   My_Sequence_Number;
+    SendindPacket.Ack_Number           =   0;
+    SendindPacket.Data_Offset          =   0;
+    SendindPacket.SYN                  =   1;
+    makePacket(SendindPacket,conversion,40);
+    //sending sync
+    if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+        perror("send error!");
     }
-    */
+    if(recvfrom(socketFd, &RecevingBUF, MSS, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
+            perror("recv error!");
+    }
+    else{
+        charToTcp(RecvingPacket,RecevingBUF);
+        displayPacket(RecvingPacket);
+    }
+    SendindPacket.Source_Port          =   My_Source_Port;
+    SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
+    SendindPacket.Sequence_Number      =   My_Sequence_Number+1;
+    SendindPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
+    SendindPacket.Data_Offset          =   0;
+    SendindPacket.SYN                  =   0;
+    SendindPacket.ACK                  =   1;
+    displayPacket(SendindPacket);
+    makePacket(SendindPacket,conversion,40);
+    if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+        perror("send error!");
+    }
 
-   //uint16_t sss = (ooo[0]<<8 )+ ooo[1];
-    /*    uint32_t sss;
-    charToType(sss,ooo,4);
-    char ssa = 15;
-    bool as;
-    charToBit(as,&ssa,4);
-    cout<<ooo[0]<<"\n";
-    cout<<ooo[1]<<"\n";
-    cout<<as<<"\n"; */
+
+    SendindPacket.Source_Port          =   My_Source_Port;
+    SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
+    SendindPacket.Sequence_Number      =   My_Sequence_Number+1;
+    SendindPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
+    SendindPacket.Data_Offset          =   0;
+    SendindPacket.SYN                  =   0;
+    SendindPacket.ACK                  =   1;
+    displayPacket(SendindPacket);
+    makePacket(SendindPacket,conversion,40);
+    if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+        perror("send error!");
+    }
+    //requesting file !!
+
 
 
 }
