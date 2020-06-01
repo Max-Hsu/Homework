@@ -19,7 +19,7 @@ int main(int argc , char ** argv){
     index_Port  =   findArgument("-o",argv,argc);
     index_Option=   findArgument("-s",argv,argc);
 
-    char buf[MSS];
+    char buf[UDP_MAX];
 
     struct sockaddr_in server;
     struct sockaddr_in client;
@@ -48,12 +48,12 @@ int main(int argc , char ** argv){
     int length = sizeof(client);
     char ok[] = "ok\0";
     char receiveIP[20];
-    char SendingChar[MSS];
+    char SendingChar[UDP_MAX];
     vector<struct Bind> ListBindDone;
     vector<struct Bind> ListBindPending;
 
     while(1){
-        if ((recvfrom(socketFd, &buf, MSS, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
+        if ((recvfrom(socketFd, &buf, UDP_MAX, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
             perror ("recv error!");
             continue;
         }
@@ -89,7 +89,7 @@ int main(int argc , char ** argv){
                     ReturnPacket.ACK                =   1;
                     makePacket(ReturnPacket,SendingChar,sizeof(SendingChar));
                     displayPacket(ReturnPacket);
-                    if (sendto(socketFd, (const char *)SendingChar, MSS, 0, (struct sockaddr*)&client, length) < 0) {
+                    if (sendto(socketFd, (const char *)SendingChar, UDP_MAX, 0, (struct sockaddr*)&client, length) < 0) {
                         perror("send error!");
                         continue;
                     }
