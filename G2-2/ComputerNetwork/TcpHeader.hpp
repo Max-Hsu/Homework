@@ -4,15 +4,15 @@
 #define RTT 15
 #define MSS 1           *1000
 #define Threshold 64    *1000
-#define UDP_MAX 64000
+#define UDP_MAX         64000
 #define Buffer_Size 512 *1000
-
+#define Debug_Displaying_Packet 0
 struct TcpHEADER{
     uint16_t        Source_Port;
     uint16_t        Destination_Port;
     uint32_t        Sequence_Number;
     uint32_t        Ack_Number;
-    unsigned char   Data_Offset;
+    unsigned char   Data_Offset;        //the range is between 20 to 60 bytes
     bool            NS;
     bool            CWR;
     bool            ECE;
@@ -26,6 +26,17 @@ struct TcpHEADER{
     uint16_t        CheckSum;
     uint16_t        Urgent_Pointer;
 };
+
+//my option definition //the option will take 2 bytes
+/*
+    1:  requesting file
+    2:  end of file
+    3:  concat data
+    4:  Sack-permittef  | length = 2
+    5:  Sack-option     | length = Sack-length  //much more info is on the requirement data
+
+
+*/
 
 template <class T>
 void charToType(T & dest,const char * ptrOfChar,size_t sizeOfBytes);

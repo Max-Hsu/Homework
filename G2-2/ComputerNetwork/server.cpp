@@ -6,8 +6,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <pthread.h>
 #include "TcpHeader.hpp"
 #include "server.hpp"
+#include "server-thread.hpp"
 using namespace std;
 
 int main(int argc , char ** argv){
@@ -19,7 +21,8 @@ int main(int argc , char ** argv){
     index_Port  =   findArgument("-o",argv,argc);
     index_Option=   findArgument("-s",argv,argc);
 
-    char buf[UDP_MAX];
+    char ReceivingBUF[UDP_MAX];
+    char SendingBUF[UDP_MAX];
 
     struct sockaddr_in server;
     struct sockaddr_in client;
@@ -46,29 +49,30 @@ int main(int argc , char ** argv){
         exit(1);
     }
     int length = sizeof(client);
-    char ok[] = "ok\0";
     char receiveIP[20];
-    char SendingChar[UDP_MAX];
     vector<struct Bind> ListBindDone;
     vector<struct Bind> ListBindPending;
+    vector<struct BindWithPthread> ListBindPending;
 
     while(1){
-        if ((recvfrom(socketFd, &buf, UDP_MAX, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
+        if ((recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
             perror ("recv error!");
             continue;
         }
         else{
             //when enter here , the server doesn't know the request(if the connection had already establish or not)
-            struct TcpHEADER Packet;
-            struct TcpHEADER ReturnPacket;
-            charToTcp(Packet,buf);
-            displayPacket(Packet);
-            if(Packet.SYN == 1){ //a client want to estab a connection
+            struct TcpHEADER ReceivingPacket;
+            struct TcpHEADER SendingPacket;
+            charToTcp(ReceivingPacket,ReceivingBUF);
+            if(Debug_Displaying_Packet){
+                displayPacket(ReceivingPacket);
+            }
+            if(ReceivingPacket.SYN == 1){ //a client want to estab a connection
                 cout<<"hi SYNC here\n";
                 struct Bind DataBind;
                 int FindSameBind = 0;
                 DataBind.ClientIp   = client.sin_addr.s_addr;
-                DataBind.ClientPort = Packet.Source_Port;
+                DataBind.ClientPort = ReceivingPacket.Source_Port;
                 
                 for(int i=0 ; i<ListBindDone.size(); i++){
                     if(ListBindDone[i].ClientIp == DataBind.ClientIp && ListBindDone[i].ClientPort == DataBind.ClientPort){
@@ -81,15 +85,17 @@ int main(int argc , char ** argv){
                     //send back ack for init connection
                     cout<<"first sync\n";
                     ListBindPending.push_back(DataBind);
-                    ReturnPacket.Source_Port        =   Packet.Destination_Port;
-                    ReturnPacket.Destination_Port   =   Packet.Source_Port;
-                    ReturnPacket.Sequence_Number    =   My_Sequence_Number;
-                    ReturnPacket.Ack_Number         =   Packet.Sequence_Number+1;
-                    ReturnPacket.Data_Offset        =   0;
-                    ReturnPacket.ACK                =   1;
-                    makePacket(ReturnPacket,SendingChar,sizeof(SendingChar));
-                    displayPacket(ReturnPacket);
-                    if (sendto(socketFd, (const char *)SendingChar, UDP_MAX, 0, (struct sockaddr*)&client, length) < 0) {
+                    SendingPacket.Source_Port        =   ReceivingPacket.Destination_Port;
+                    SendingPacket.Destination_Port   =   ReceivingPacket.Source_Port;
+                    SendingPacket.Sequence_Number    =   My_Sequence_Number;
+                    SendingPacket.Ack_Number         =   ReceivingPacket.Sequence_Number+1;
+                    SendingPacket.Data_Offset        =   20;
+                    SendingPacket.ACK                =   1;
+                    makePacket(SendingPacket,SendingBUF,sizeof(SendingBUF));
+                    if(Debug_Displaying_Packet){
+                        displayPacket(SendingPacket);
+                    }
+                    if (sendto(socketFd, (const char *)SendingBUF, UDP_MAX, 0, (struct sockaddr*)&client, length) < 0) {
                         perror("send error!");
                         continue;
                     }
@@ -101,7 +107,7 @@ int main(int argc , char ** argv){
                 int FindSameBindPending = 0;
                 int FindSameBindPendingIndex = -1;
                 DataBind.ClientIp   = client.sin_addr.s_addr;
-                DataBind.ClientPort = Packet.Source_Port;
+                DataBind.ClientPort = ReceivingPacket.Source_Port;
                 
                 for(int i=0 ; i<ListBindDone.size(); i++){
                     if(ListBindDone[i].ClientIp == DataBind.ClientIp && ListBindDone[i].ClientPort == DataBind.ClientPort){
@@ -118,22 +124,43 @@ int main(int argc , char ** argv){
                 }
 
                 if(FindSameBindDone){       //already establish connection , so this is normal operation //should provide some "ls" for user to choose file?
-/*                     //send back ack for init connection
-                    ReturnPacket.Source_Port        =   Packet.Destination_Port;
-                    ReturnPacket.Destination_Port   =   Packet.Source_Port;
-                    ReturnPacket.Sequence_Number    =   My_Sequence_Number;
-                    ReturnPacket.Ack_Number         =   Packet.Sequence_Number+1;
-                    ReturnPacket.Data_Offset        =   0;
-                    ReturnPacket.ACK                =   1;
-                    makePacket(ReturnPacket,SendingChar,sizeof(SendingChar));
-                    if (sendto(socketFd, (const char *)SendingChar, sizeof(ok), 0, (struct sockaddr*)&client, length) < 0) {
+                                            //well right now we are just calling the file name for transportation
+                    /*                     //send back ack for init connection
+                    SendingPacket.Source_Port        =   ReceivingPacket.Destination_Port;
+                    SendingPacket.Destination_Port   =   ReceivingPacket.Source_Port;
+                    SendingPacket.Sequence_Number    =   My_Sequence_Number;
+                    SendingPacket.Ack_Number         =   ReceivingPacket.Sequence_Number+1;
+                    SendingPacket.Data_Offset        =   0;
+                    SendingPacket.ACK                =   1;
+                    makePacket(SendingPacket,SendingBUF,sizeof(SendingBUF));
+                    if (sendto(socketFd, (const char *)SendingBUF, sizeof(ok), 0, (struct sockaddr*)&client, length) < 0) {
                         perror("send error!");
                         continue;
                     } */
-                    cout<<"est done.. good job!!\n";
+                    //********************cout<<"est done.. good job!!\n";*****************************//
+                    //if packet come here , it has two type one is requesting the file or the ack..
+                    //so we need to create socket for handling the situation and send file
+                    //how to transfer the file? using the receving header?
+                    //but is the data important
+
+                    if(ReceivingPacket.Data_Offset!=20){    //still has a chance of two prosability :
+                                                            //1.sack                , but we will ignore this and hand it to the thread
+                                                            //2.requesting a file
+                        
+                        if(ReceivingBUF[20]==2){            //a file request , so start a new thread
+                                                            //check if the request client has already init the sending thread
+
+                        }
+                    }
+                    /*
+                    *   normal ack , match if there is a match the thread list
+                    * 
+                    * 
+                    *
+                    */ 
                 }
                 else if(FindSameBindPending){
-                    if(Packet.ACK == 1 && Packet.Ack_Number == (My_Sequence_Number +1)){
+                    if(ReceivingPacket.ACK == 1 && ReceivingPacket.Ack_Number == (My_Sequence_Number +1)){
                         ListBindDone.push_back(ListBindPending[FindSameBindPendingIndex]);
                         ListBindPending.erase(ListBindPending.begin()+FindSameBindPendingIndex);
                         cout<<"bind ok!!\n";
@@ -144,11 +171,11 @@ int main(int argc , char ** argv){
             }
             
             /*cout<<inet_ntop(AF_INET,&(client.sin_addr),receiveIP,INET_ADDRSTRLEN)<<"\t";
-            cout<<Packet.Source_Port     <<"\t";
-            cout<<Packet.Destination_Port<<"\t";
-            cout<<Packet.Sequence_Number <<"\t";
-            cout<<Packet.Ack_Number      <<"\t";
-            cout<<int(Packet.Data_Offset)<<"\t";
+            cout<<ReceivingPacket.Source_Port     <<"\t";
+            cout<<ReceivingPacket.Destination_Port<<"\t";
+            cout<<ReceivingPacket.Sequence_Number <<"\t";
+            cout<<ReceivingPacket.Ack_Number      <<"\t";
+            cout<<int(ReceivingPacket.Data_Offset)<<"\t";
             cout<<"\n"; */
 
         }

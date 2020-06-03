@@ -20,7 +20,7 @@ int main(int argc , char ** argv){
     int socketFd;
     uint16_t My_Source_Port = rand()%65536;
     uint32_t My_Sequence_Number = (rand()%10000)+1;
-    char RecevingBUF[UDP_MAX];
+    char ReceivingBUF[UDP_MAX];
     index_IP    =   findArgument("-i",argv,argc);
     index_Port  =   findArgument("-o",argv,argc);
     index_Option=   findArgument("-s",argv,argc);
@@ -69,28 +69,32 @@ int main(int argc , char ** argv){
     SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
     SendindPacket.Sequence_Number      =   My_Sequence_Number;
     SendindPacket.Ack_Number           =   0;
-    SendindPacket.Data_Offset          =   0;
+    SendindPacket.Data_Offset          =   20;
     SendindPacket.SYN                  =   1;
     makePacket(SendindPacket,conversion,40);
     //sending sync
     if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
         perror("send error!");
     }
-    if(recvfrom(socketFd, &RecevingBUF, UDP_MAX, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
+    if(recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
             perror("recv error!");
     }
     else{
-        charToTcp(RecvingPacket,RecevingBUF);
-        displayPacket(RecvingPacket);
+        charToTcp(RecvingPacket,ReceivingBUF);
+        if(Debug_Displaying_Packet){
+            displayPacket(RecvingPacket);
+        }
     }
     SendindPacket.Source_Port          =   My_Source_Port;
     SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
     SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
     SendindPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
-    SendindPacket.Data_Offset          =   0;
+    SendindPacket.Data_Offset          =   20;
     SendindPacket.SYN                  =   0;
     SendindPacket.ACK                  =   1;
-    displayPacket(SendindPacket);
+    if(Debug_Displaying_Packet){
+        displayPacket(SendindPacket);
+    }
     makePacket(SendindPacket,conversion,40);
     if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
         perror("send error!");
@@ -101,10 +105,12 @@ int main(int argc , char ** argv){
     SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
     SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
     SendindPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
-    SendindPacket.Data_Offset          =   0;
+    SendindPacket.Data_Offset          =   20;
     SendindPacket.SYN                  =   0;
     SendindPacket.ACK                  =   1;
-    displayPacket(SendindPacket);
+    if(Debug_Displaying_Packet){
+        displayPacket(SendindPacket);
+    }
     makePacket(SendindPacket,conversion,40);
     if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
         perror("send error!");
@@ -117,8 +123,48 @@ int main(int argc , char ** argv){
         SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
         SendindPacket.Data_Offset          =   0;
         SendindPacket.SYN                  =   0;
-        
-    }
+        //so i need to tell which is start and the end of the file tranfering
+        //expecting after send the packet , the server will send data back directly
+        //keep receiving until the option for the end of the file show up , and the end of the loop
 
+        /**
+         *      here are missing some code to open file to write 
+         * 
+         * 
+         * 
+         * 
+        */
+        int endOfFile_Indicator = 0;
+        while(!endOfFile_Indicator){
+            if(recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
+                perror("recv error!");
+            }
+            else{
+                charToTcp(RecvingPacket,ReceivingBUF);
+                if(Debug_Displaying_Packet){
+                    displayPacket(RecvingPacket);
+                }
+                if(RecvingPacket.Data_Offset!=20){  //means it might not a regular data packet
+                                                    //but consider that if the udp transport separate the TCP packet , so we also need an indicator of that situation
+                    if(int(ReceivingBUF[20])==2){
+                        //preparing to close the file
+                        endOfFile_Indicator = 1;
+                        //close file
+                    }
+                    else if(int(ReceivingBUF[20])==3){
+                        //just ignore and concat the file
+                    }       
+                }
+                /*
+                *   write the file
+                * 
+                * 
+                * 
+                * 
+                */
+
+            }
+        }
+    }
 
 }
