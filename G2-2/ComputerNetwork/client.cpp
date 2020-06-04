@@ -121,7 +121,7 @@ int main(int argc , char ** argv){
         SendindPacket.Source_Port          =   My_Source_Port;
         SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
         SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
-        SendindPacket.Data_Offset          =   0;
+        SendindPacket.Data_Offset          =   24;
         SendindPacket.SYN                  =   0;
         //so i need to tell which is start and the end of the file tranfering
         //expecting after send the packet , the server will send data back directly
@@ -153,7 +153,10 @@ int main(int argc , char ** argv){
                     }
                     else if(int(ReceivingBUF[20])==3){
                         //just ignore and concat the file
-                    }       
+                    }
+                    else if(int(ReceivingBUF[20])==6){
+                        //a bad file request // maybe the file is not exist
+                    }
                 }
                 /*
                 *   write the file

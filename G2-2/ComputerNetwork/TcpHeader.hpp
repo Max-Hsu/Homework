@@ -6,7 +6,7 @@
 #define Threshold 64    *1000
 #define UDP_MAX         64000
 #define Buffer_Size 512 *1000
-#define Debug_Displaying_Packet 0
+#define Debug_Displaying_Packet 1
 struct TcpHEADER{
     uint16_t        Source_Port;
     uint16_t        Destination_Port;
@@ -29,12 +29,12 @@ struct TcpHEADER{
 
 //my option definition //the option will take 2 bytes
 /*
-    1:  requesting file
-    2:  end of file
-    3:  concat data
-    4:  Sack-permittef  | length = 2
-    5:  Sack-option     | length = Sack-length  //much more info is on the requirement data
-
+    1:  requesting file |0
+    2:  end of file     |0
+    3:  concat data     |0
+    4:  Sack-permittef  |length = 2
+    5:  Sack-option     |length = Sack-length  //much more info is on the requirement data
+    6:  Bad Request     |0
 
 */
 

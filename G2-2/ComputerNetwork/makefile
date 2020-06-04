@@ -1,15 +1,17 @@
 CC	=	g++
-CFLAGS	=	-Wall	-std=c++11	-g
+CFLAGS	=	-Wall	-std=c++11	-g	-pthread
 PROGS	=	server	client
-all:TcpHeader	server	client
+all:TcpHeader	server-thread	server	client
 TcpHeader:
 	$(CC)	$(CFLAGS)	-c	TcpHeader.cpp
+server-thread:
+	$(CC)	$(CFLAGS)	-c	server-thread.cpp
 server:
 	$(CC)	$(CFLAGS)	-c	server.cpp
-	$(CC)	$(CFLAGS)	-o 	server	server.o	TcpHeader.o
+	$(CC)	$(CFLAGS)	-o 	server	server.o	TcpHeader.o	server-thread.o
 client:
 	$(CC)	$(CFLAGS)	-c	client.cpp
-	$(CC)	$(CFLAGS)	-o 	client	client.o	TcpHeader.o
+	$(CC)	$(CFLAGS)	-o 	client	client.o	TcpHeader.o	server-thread.o
 .PHONY:clean
 clean:
 	-rm -f $(PROGS) *.o	$(PROGS).dep

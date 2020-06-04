@@ -1,34 +1,19 @@
 #include <iostream>
-#include "server-thread.hpp"
+#include "test.hpp"
 
 using namespace std;
 
 void * server_thread(void * args){
-    struct PassingToThread * here = (PassingToThread *) args;
-    char requestingFile [50];
-    int fd;
-
+    struct thread_test * here = (thread_test *) args;
     while(1){
         pthread_cond_wait(&(here->cond_signal),&(here->lock));
-        if(here->Header.Data_Offset>20){    // 1.requesting file
-                                            // 2.sack , but not yet implement
-            
-                 
-        }
-
-        else if(here->Header.ACK == 1){      // the ack come , prepare file!!
-
-
-        }
-
-
-        here->readOK = 1;
+        cout<<"xx\n";
+        cout<<here->ReceivingBUF_PTH<<"\n";
     }
 
 
 }
 
-/* 
 int main(){
     char ax[5] = "1xx\0";
     char bx[5] = "2x\0";
@@ -60,4 +45,4 @@ int main(){
     pthread_cond_signal(&(a->cond_signal));
     sleep(1);
     cout<<"bye\n";
-} */
+}

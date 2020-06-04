@@ -52,7 +52,7 @@ int main(int argc , char ** argv){
     char receiveIP[20];
     vector<struct Bind> ListBindDone;
     vector<struct Bind> ListBindPending;
-    vector<struct BindWithPthread> ListBindPending;
+    vector<struct PassingToThread *> Server_Pthread_List;
 
     while(1){
         if ((recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
@@ -73,7 +73,7 @@ int main(int argc , char ** argv){
                 int FindSameBind = 0;
                 DataBind.ClientIp   = client.sin_addr.s_addr;
                 DataBind.ClientPort = ReceivingPacket.Source_Port;
-                
+                DataBind.Last_Sequence = ReceivingPacket.Sequence_Number;
                 for(int i=0 ; i<ListBindDone.size(); i++){
                     if(ListBindDone[i].ClientIp == DataBind.ClientIp && ListBindDone[i].ClientPort == DataBind.ClientPort){
                         FindSameBind = 1;
@@ -106,12 +106,14 @@ int main(int argc , char ** argv){
                 int FindSameBindDone = 0;
                 int FindSameBindPending = 0;
                 int FindSameBindPendingIndex = -1;
+                int FindSameBindDoneIndex = -1;
                 DataBind.ClientIp   = client.sin_addr.s_addr;
                 DataBind.ClientPort = ReceivingPacket.Source_Port;
                 
                 for(int i=0 ; i<ListBindDone.size(); i++){
                     if(ListBindDone[i].ClientIp == DataBind.ClientIp && ListBindDone[i].ClientPort == DataBind.ClientPort){
                         FindSameBindDone = 1;
+                        FindSameBindDoneIndex = i;
                         break;
                     }
                 }
@@ -140,18 +142,52 @@ int main(int argc , char ** argv){
                     //********************cout<<"est done.. good job!!\n";*****************************//
                     //if packet come here , it has two type one is requesting the file or the ack..
                     //so we need to create socket for handling the situation and send file
-                    //how to transfer the file? using the receving header?
+                    //how to transfer the file? using the receiving header?
                     //but is the data important
-
-                    if(ReceivingPacket.Data_Offset!=20){    //still has a chance of two prosability :
-                                                            //1.sack                , but we will ignore this and hand it to the thread
-                                                            //2.requesting a file
-                        
-                        if(ReceivingBUF[20]==2){            //a file request , so start a new thread
-                                                            //check if the request client has already init the sending thread
-
+                    int index_Server_Pthread_List = -1;
+                    for(int i = 0 ; i < Server_Pthread_List.size();i++){
+                        if(Server_Pthread_List[i]->Bind_data.ClientIp == DataBind.ClientIp && Server_Pthread_List[i]->Bind_data.ClientPort == DataBind.ClientPort){
+                            index_Server_Pthread_List = i;
                         }
                     }
+                    if(index_Server_Pthread_List != -1){
+                        //well just cond wake the pthread
+                        Server_Pthread_List[index_Server_Pthread_List]->Bind_data.Packet_Size    = ReceivingPacket.Sequence_Number - ListBindDone[FindSameBindDoneIndex].Last_Sequence;
+                        Server_Pthread_List[index_Server_Pthread_List]->Bind_data.Last_Sequence  = ReceivingPacket.Sequence_Number;
+                        Server_Pthread_List[index_Server_Pthread_List]->readOK                   = 0;
+                        Server_Pthread_List[index_Server_Pthread_List]->ReceivingBUF_PTH         = ReceivingBUF;
+                        Server_Pthread_List[index_Server_Pthread_List]->Header                   = ReceivingPacket;
+                        pthread_cond_signal(&(Server_Pthread_List[index_Server_Pthread_List]->cond_signal));
+                        while(!(Server_Pthread_List[index_Server_Pthread_List]->readOK));
+                    }
+                    else{
+
+                        //necessity of inner two if statement?
+                        if(ReceivingPacket.Data_Offset!=20){    //still has a chance of two prosability :
+                                                                //1.ack or sack need to check!!!           , but we will ignore this and hand it to the thread
+                                                                //2.requesting a file
+                            
+                            if(ReceivingBUF[20]==1){            //a file request , so start a new thread
+                                                                //check if the request client has already init the sending thread
+                                if(index_Server_Pthread_List == -1){    //only if the client is not found in the pthread list, create the pthread
+                                    struct PassingToThread * SendToPthread = new(struct PassingToThread);
+                                    SendToPthread->Bind_data.Packet_Size    = ReceivingPacket.Sequence_Number - ListBindDone[FindSameBindDoneIndex].Last_Sequence;
+                                    SendToPthread->Bind_data.Last_Sequence  = ReceivingPacket.Sequence_Number;
+                                    SendToPthread->Bind_data.ClientIp       = ListBindDone[FindSameBindDoneIndex].ClientIp;
+                                    SendToPthread->Bind_data.ClientPort     = ListBindDone[FindSameBindDoneIndex].ClientPort;
+                                    SendToPthread->cond_signal              = PTHREAD_COND_INITIALIZER;
+                                    SendToPthread->Header                   = ReceivingPacket;
+                                    SendToPthread->ReceivingBUF_PTH         = ReceivingBUF;
+                                    pthread_create(&(SendToPthread->tid),NULL,server_thread,SendToPthread);
+                                    pthread_cond_signal(&(SendToPthread->cond_signal));
+                                    Server_Pthread_List.push_back(SendToPthread);
+                                    while(!(SendToPthread->readOK));
+                                }
+                            }
+                        }
+                    }
+
+
                     /*
                     *   normal ack , match if there is a match the thread list
                     * 
@@ -161,6 +197,8 @@ int main(int argc , char ** argv){
                 }
                 else if(FindSameBindPending){
                     if(ReceivingPacket.ACK == 1 && ReceivingPacket.Ack_Number == (My_Sequence_Number +1)){
+                        ListBindPending[FindSameBindPendingIndex].Packet_Size = ReceivingPacket.Sequence_Number - ListBindPending[FindSameBindPendingIndex].Last_Sequence;
+                        ListBindPending[FindSameBindPendingIndex].Last_Sequence = ReceivingPacket.Sequence_Number;
                         ListBindDone.push_back(ListBindPending[FindSameBindPendingIndex]);
                         ListBindPending.erase(ListBindPending.begin()+FindSameBindPendingIndex);
                         cout<<"bind ok!!\n";
@@ -180,4 +218,5 @@ int main(int argc , char ** argv){
 
         }
     }
+    sleep(1);   //we need this is because exiting the main but the pthread isn't clear , so add this for prevent incorrect memory access
 }

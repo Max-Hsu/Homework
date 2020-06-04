@@ -37,6 +37,7 @@ void charToTcp(struct TcpHEADER & header , char * ptrOfChar){ //this will not pr
     charToType  (header.Ack_Number          , ptrOfChar+8   ,4);
     charToType  (header.Data_Offset         , ptrOfChar+12  ,1);
     header.Data_Offset >>= 4;
+    header.Data_Offset <<= 2;
     charToBit   (header.NS                  , ptrOfChar+12  ,0);
     charToBit   (header.CWR                 , ptrOfChar+13  ,7);
     charToBit   (header.ECE                 , ptrOfChar+13  ,6);
@@ -86,7 +87,7 @@ void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size)
     typeToChar  (Header.Sequence_Number     , packetChar+4       );
     typeToChar  (Header.Ack_Number          , packetChar+8       );
     unsigned char tmp_Data_Offset = Header.Data_Offset;
-    tmp_Data_Offset <<= 4;
+    tmp_Data_Offset <<= 2;
     typeToChar  (tmp_Data_Offset            , packetChar+12      );
     bitToChar   (Header.NS                  , packetChar+12  ,0  );
     bitToChar   (Header.CWR                 , packetChar+13  ,7  );
