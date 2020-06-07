@@ -1,3 +1,5 @@
+#ifndef SERVER_HPP
+#define SERVER_HPP
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
@@ -13,6 +15,7 @@ struct Bind{
 };
 
 
+#endif
 /* 
 struct SendingInfoToPthread{
     pthread_cond_t      cond_signal;

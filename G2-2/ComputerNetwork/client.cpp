@@ -51,29 +51,28 @@ int main(int argc , char ** argv){
     server.sin_addr.s_addr  =   htonl(INADDR_ANY);
 
     int length = sizeof(client);
-    char hello[] = "hello\0";
 
-    char conversion[40];
-    memset(conversion,'\0',40);
+    char SendingBUF[UDP_MAX];
+    memset(SendingBUF,'\0',UDP_MAX);
     /*
     for(int i=0 ;i<40;i++){
-        printf("%d",int(conversion[i]));
+        printf("%d",int(SendingBUF[i]));
     }
     printf("\n");
     */
-    struct TcpHEADER SendindPacket;
+    struct TcpHEADER SendingPacket;
     struct TcpHEADER RecvingPacket;
     //let's do three way handshake
 
-    SendindPacket.Source_Port          =   My_Source_Port;
-    SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
-    SendindPacket.Sequence_Number      =   My_Sequence_Number;
-    SendindPacket.Ack_Number           =   0;
-    SendindPacket.Data_Offset          =   20;
-    SendindPacket.SYN                  =   1;
-    makePacket(SendindPacket,conversion,40);
+    SendingPacket.Source_Port          =   My_Source_Port;
+    SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
+    SendingPacket.Sequence_Number      =   My_Sequence_Number;
+    SendingPacket.Ack_Number           =   0;
+    SendingPacket.Data_Offset          =   20;
+    SendingPacket.SYN                  =   1;
+    makePacket(SendingPacket,SendingBUF,UDP_MAX);
     //sending sync
-    if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+    if(sendto(socketFd, SendingBUF, sizeof(SendingBUF), 0, (const struct sockaddr *) &client, sizeof(client))<0){
         perror("send error!");
     }
     if(recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
@@ -85,48 +84,61 @@ int main(int argc , char ** argv){
             displayPacket(RecvingPacket);
         }
     }
-    SendindPacket.Source_Port          =   My_Source_Port;
-    SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
-    SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
-    SendindPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
-    SendindPacket.Data_Offset          =   20;
-    SendindPacket.SYN                  =   0;
-    SendindPacket.ACK                  =   1;
+    SendingPacket.Source_Port          =   My_Source_Port;
+    SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
+    SendingPacket.Sequence_Number      =   ++My_Sequence_Number;
+    SendingPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
+    SendingPacket.Data_Offset          =   20;
+    SendingPacket.SYN                  =   0;
+    SendingPacket.ACK                  =   1;
     if(Debug_Displaying_Packet){
-        displayPacket(SendindPacket);
+        displayPacket(SendingPacket);
     }
-    makePacket(SendindPacket,conversion,40);
-    if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+    makePacket(SendingPacket,SendingBUF,UDP_MAX);
+    if(sendto(socketFd, SendingBUF, sizeof(SendingBUF), 0, (const struct sockaddr *) &client, sizeof(client))<0){
         perror("send error!");
     }
 
-
-    SendindPacket.Source_Port          =   My_Source_Port;
-    SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
-    SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
-    SendindPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
-    SendindPacket.Data_Offset          =   20;
-    SendindPacket.SYN                  =   0;
-    SendindPacket.ACK                  =   1;
+    
+    SendingPacket.Source_Port          =   My_Source_Port;
+    SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
+    SendingPacket.Sequence_Number      =   ++My_Sequence_Number;
+    SendingPacket.Ack_Number           =   RecvingPacket.Sequence_Number+1;
+    SendingPacket.Data_Offset          =   20;
+    SendingPacket.SYN                  =   0;
+    SendingPacket.ACK                  =   1;
     if(Debug_Displaying_Packet){
-        displayPacket(SendindPacket);
+        displayPacket(SendingPacket);
     }
-    makePacket(SendindPacket,conversion,40);
-    if(sendto(socketFd, conversion, sizeof(conversion), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+    makePacket(SendingPacket,SendingBUF,UDP_MAX);
+    if(sendto(socketFd, SendingBUF, sizeof(SendingBUF), 0, (const struct sockaddr *) &client, sizeof(client))<0){
         perror("send error!");
     }
+    
     //requesting file !!
     for(int i = 0 ;i <atoi(argv[index_File]);i++){
         cout<<"requesting\t"<<argv[index_File+i+1]<<"\n";
-        SendindPacket.Source_Port          =   My_Source_Port;
-        SendindPacket.Destination_Port     =   atoi(argv[index_Port]);
-        SendindPacket.Sequence_Number      =   ++My_Sequence_Number;
-        SendindPacket.Data_Offset          =   24;
-        SendindPacket.SYN                  =   0;
+        SendingPacket.Source_Port          =   My_Source_Port;
+        cout<<"My source port:"<<My_Source_Port<<"\n";
+        SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
+        SendingPacket.Sequence_Number      =   My_Sequence_Number+24+strlen(argv[index_File+i+1]);
+        My_Sequence_Number+=24+strlen(argv[index_File+i+1]);
+        SendingPacket.Data_Offset          =   24;
+        SendingPacket.SYN                  =   0;
         //so i need to tell which is start and the end of the file tranfering
         //expecting after send the packet , the server will send data back directly
         //keep receiving until the option for the end of the file show up , and the end of the loop
 
+        makePacket(SendingPacket,SendingBUF,UDP_MAX);
+        SendingBUF[20]                     = 1;
+        SendingBUF[21]                     = 0;
+        SendingBUF[22]                     = 0;
+        SendingBUF[23]                     = 0;
+        
+        memcpy(SendingBUF+24,argv[index_File+i+1],strlen(argv[index_File+i+1]));         //50 for the length of the file is enough i think
+        if(sendto(socketFd, SendingBUF, sizeof(SendingBUF), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+            perror("send error!");
+        }
         /**
          *      here are missing some code to open file to write 
          * 

@@ -1,19 +1,25 @@
 #include <iostream>
 #include "server-thread.hpp"
-
+#include <vector>
+#include <string.h>
 using namespace std;
 
 void * server_thread(void * args){
     struct PassingToThread * here = (PassingToThread *) args;
     char requestingFile [50];
     int fd;
-
+    char filename[50];
+    vector<struct unpackOption> Options;
     while(1){
         pthread_cond_wait(&(here->cond_signal),&(here->lock));
+        cout<<"thread open\n";
         if(here->Header.Data_Offset>20){    // 1.requesting file
                                             // 2.sack , but not yet implement
-            
-                 
+            if(here->ReceivingBUF_PTH[20]==1){
+                memcpy(filename,here->ReceivingBUF_PTH+here->Header.Data_Offset,here->Bind_data.Packet_Size-here->Header.Data_Offset);
+                cout<<"receiving a request : "<<filename<<"\n";
+            }
+
         }
 
         else if(here->Header.ACK == 1){      // the ack come , prepare file!!

@@ -144,6 +144,7 @@ int main(int argc , char ** argv){
                     //so we need to create socket for handling the situation and send file
                     //how to transfer the file? using the receiving header?
                     //but is the data important
+                    cout<<"after bind\n";
                     int index_Server_Pthread_List = -1;
                     for(int i = 0 ; i < Server_Pthread_List.size();i++){
                         if(Server_Pthread_List[i]->Bind_data.ClientIp == DataBind.ClientIp && Server_Pthread_List[i]->Bind_data.ClientPort == DataBind.ClientPort){
@@ -160,30 +161,32 @@ int main(int argc , char ** argv){
                         pthread_cond_signal(&(Server_Pthread_List[index_Server_Pthread_List]->cond_signal));
                         while(!(Server_Pthread_List[index_Server_Pthread_List]->readOK));
                     }
-                    else{
-
+                    else{       //only if the client is not found in the pthread list, create the pthread
+                        cout<<"hi\n";
                         //necessity of inner two if statement?
-                        if(ReceivingPacket.Data_Offset!=20){    //still has a chance of two prosability :
+                        if(ReceivingPacket.Data_Offset!=20 && ReceivingBUF[20]==1){    //still has a chance of two prosability :
                                                                 //1.ack or sack need to check!!!           , but we will ignore this and hand it to the thread
                                                                 //2.requesting a file
                             
-                            if(ReceivingBUF[20]==1){            //a file request , so start a new thread
+                                                                //a file request , so start a new thread
                                                                 //check if the request client has already init the sending thread
-                                if(index_Server_Pthread_List == -1){    //only if the client is not found in the pthread list, create the pthread
-                                    struct PassingToThread * SendToPthread = new(struct PassingToThread);
-                                    SendToPthread->Bind_data.Packet_Size    = ReceivingPacket.Sequence_Number - ListBindDone[FindSameBindDoneIndex].Last_Sequence;
-                                    SendToPthread->Bind_data.Last_Sequence  = ReceivingPacket.Sequence_Number;
-                                    SendToPthread->Bind_data.ClientIp       = ListBindDone[FindSameBindDoneIndex].ClientIp;
-                                    SendToPthread->Bind_data.ClientPort     = ListBindDone[FindSameBindDoneIndex].ClientPort;
-                                    SendToPthread->cond_signal              = PTHREAD_COND_INITIALIZER;
-                                    SendToPthread->Header                   = ReceivingPacket;
-                                    SendToPthread->ReceivingBUF_PTH         = ReceivingBUF;
-                                    pthread_create(&(SendToPthread->tid),NULL,server_thread,SendToPthread);
-                                    pthread_cond_signal(&(SendToPthread->cond_signal));
-                                    Server_Pthread_List.push_back(SendToPthread);
-                                    while(!(SendToPthread->readOK));
-                                }
-                            }
+                            cout<<"receiving a request\n";
+                            struct PassingToThread * SendToPthread = new(struct PassingToThread);
+                            SendToPthread->Bind_data.Packet_Size    = ReceivingPacket.Sequence_Number - ListBindDone[FindSameBindDoneIndex].Last_Sequence;
+                            SendToPthread->Bind_data.Last_Sequence  = ReceivingPacket.Sequence_Number;
+                            SendToPthread->Bind_data.ClientIp       = ListBindDone[FindSameBindDoneIndex].ClientIp;
+                            SendToPthread->Bind_data.ClientPort     = ListBindDone[FindSameBindDoneIndex].ClientPort;
+                            SendToPthread->cond_signal              = PTHREAD_COND_INITIALIZER;
+                            SendToPthread->Header                   = ReceivingPacket;
+                            SendToPthread->ReceivingBUF_PTH         = ReceivingBUF;
+                            pthread_create(&(SendToPthread->tid),NULL,server_thread,SendToPthread);
+                            usleep(500);
+                            pthread_cond_signal(&(SendToPthread->cond_signal));
+                            Server_Pthread_List.push_back(SendToPthread);
+                            while(!(SendToPthread->readOK));
+                        }
+                        else{
+                            cout<<"failing to recognize\n";
                         }
                     }
 
@@ -203,6 +206,9 @@ int main(int argc , char ** argv){
                         ListBindPending.erase(ListBindPending.begin()+FindSameBindPendingIndex);
                         cout<<"bind ok!!\n";
                     }
+                }
+                else{
+                    cout<<"210\n";
                 }
 
 

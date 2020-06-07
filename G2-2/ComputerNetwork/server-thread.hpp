@@ -2,6 +2,9 @@
 #include <iostream>
 #include <unistd.h>
 #include "TcpHeader.hpp"
+#include "server.hpp"
+#include <string.h>
+#include <vector>
 void *server_thread(void * args);
 struct PassingToThread{
     struct Bind         Bind_data;
@@ -12,4 +15,9 @@ struct PassingToThread{
     struct TcpHEADER    Header;
     volatile int        readOK;
     bool                SackOption;
+};
+
+struct unpackOption{
+    uint8_t options;
+    uint8_t parameters;
 };
