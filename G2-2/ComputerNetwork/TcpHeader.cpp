@@ -32,7 +32,7 @@ void charToBit(T & dest, const char * ptrOfChar,size_t offset){ //count from rig
 
 void charToTcp(struct TcpHEADER & header , char * ptrOfChar){ //this will not process the "options"
     charToType  (header.Source_Port         , ptrOfChar     ,2);
-    std::cout<<"Char to tcp"<<header.Source_Port<<"\n";
+    //std::cout<<"Char to tcp"<<header.Source_Port<<"\n";
     charToType  (header.Destination_Port    , ptrOfChar+2   ,2);
     charToType  (header.Sequence_Number     , ptrOfChar+4   ,4);
     charToType  (header.Ack_Number          , ptrOfChar+8   ,4);

@@ -157,7 +157,7 @@ int main(int argc , char ** argv){
                         Server_Pthread_List[index_Server_Pthread_List]->Bind_data.Last_Sequence  = ReceivingPacket.Sequence_Number;
                         Server_Pthread_List[index_Server_Pthread_List]->readOK                   = 0;
                         Server_Pthread_List[index_Server_Pthread_List]->ReceivingBUF_PTH         = ReceivingBUF;
-                        Server_Pthread_List[index_Server_Pthread_List]->Header                   = ReceivingPacket;
+                        Server_Pthread_List[index_Server_Pthread_List]->ReceivingPacket          = ReceivingPacket;
                         pthread_cond_signal(&(Server_Pthread_List[index_Server_Pthread_List]->cond_signal));
                         while(!(Server_Pthread_List[index_Server_Pthread_List]->readOK));
                     }
@@ -177,8 +177,11 @@ int main(int argc , char ** argv){
                             SendToPthread->Bind_data.ClientIp       = ListBindDone[FindSameBindDoneIndex].ClientIp;
                             SendToPthread->Bind_data.ClientPort     = ListBindDone[FindSameBindDoneIndex].ClientPort;
                             SendToPthread->cond_signal              = PTHREAD_COND_INITIALIZER;
-                            SendToPthread->Header                   = ReceivingPacket;
+                            SendToPthread->ReceivingPacket          = ReceivingPacket;
                             SendToPthread->ReceivingBUF_PTH         = ReceivingBUF;
+                            SendToPthread->SendingBUF_PTH           = SendingBUF;
+                            SendToPthread->SendingPacket            = SendingPacket;
+                            SendToPthread->sockFd_PTH               = socketFd;
                             pthread_create(&(SendToPthread->tid),NULL,server_thread,SendToPthread);
                             usleep(500);
                             pthread_cond_signal(&(SendToPthread->cond_signal));

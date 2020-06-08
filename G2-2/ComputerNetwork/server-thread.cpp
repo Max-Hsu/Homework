@@ -2,6 +2,15 @@
 #include "server-thread.hpp"
 #include <vector>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "TcpHeader.hpp"
+#include <netinet/ip.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 using namespace std;
 
 void * server_thread(void * args){
@@ -12,12 +21,25 @@ void * server_thread(void * args){
     vector<struct unpackOption> Options;
     while(1){
         pthread_cond_wait(&(here->cond_signal),&(here->lock));
-        cout<<"thread open\n";
-        if(here->Header.Data_Offset>20){    // 1.requesting file
-                                            // 2.sack , but not yet implement
+        //cout<<"thread open\n";
+        int fd;
+        if(here->ReceivingPacket.Data_Offset>20){       // 1.requesting file
+                                                        // 2.sack , but not yet implement
             if(here->ReceivingBUF_PTH[20]==1){
-                memcpy(filename,here->ReceivingBUF_PTH+here->Header.Data_Offset,here->Bind_data.Packet_Size-here->Header.Data_Offset);
+                memcpy(filename,here->ReceivingBUF_PTH+here->ReceivingPacket.Data_Offset,here->Bind_data.Packet_Size-here->ReceivingPacket.Data_Offset);
                 cout<<"receiving a request : "<<filename<<"\n";
+                fd = open(filename,O_RDONLY);
+                if(fd == -1){
+                    here->SendingPacket.Source_Port        =   here->ReceivingPacket.Destination_Port;
+                    here->SendingPacket.Destination_Port   =   here->ReceivingPacket.Source_Port;
+                    here->SendingPacket.Sequence_Number    =   here->My_Sequence_Number+24;
+                    here->SendingPacket.Data_Offset        =   24;
+                    here->SendingPacket.ACK                =   0;
+                    makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
+                    if(sendto(here->socketFd_PTH, here->SendingBUF_PTH, sizeof(here->SendingBUF_PTH), 0, (const struct sockaddr *) &client, sizeof(client))<0){
+                        perror("send error!");
+                    }
+                }
             }
 
         }

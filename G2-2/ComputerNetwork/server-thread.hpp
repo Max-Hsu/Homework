@@ -12,9 +12,13 @@ struct PassingToThread{
     pthread_cond_t      cond_signal;
     pthread_mutex_t     lock;
     char *              ReceivingBUF_PTH;
-    struct TcpHEADER    Header;
+    struct TcpHEADER    ReceivingPacket;
+    char *              SendingBUF_PTH;
+    struct TcpHEADER    SendingPacket;
     volatile int        readOK;
     bool                SackOption;
+    uint32_t            My_Sequence_Number;
+    int                 sockFd_PTH;
 };
 
 struct unpackOption{

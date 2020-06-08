@@ -119,7 +119,7 @@ int main(int argc , char ** argv){
     for(int i = 0 ;i <atoi(argv[index_File]);i++){
         cout<<"requesting\t"<<argv[index_File+i+1]<<"\n";
         SendingPacket.Source_Port          =   My_Source_Port;
-        cout<<"My source port:"<<My_Source_Port<<"\n";
+        //cout<<"My source port:"<<My_Source_Port<<"\n";
         SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
         SendingPacket.Sequence_Number      =   My_Sequence_Number+24+strlen(argv[index_File+i+1]);
         My_Sequence_Number+=24+strlen(argv[index_File+i+1]);
