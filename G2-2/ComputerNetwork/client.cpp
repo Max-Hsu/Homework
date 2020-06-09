@@ -18,6 +18,7 @@ int main(int argc , char ** argv){
     int index_Option;
     int index_File;
     int socketFd;
+    uint32_t server_s_sequence_number;
     uint16_t My_Source_Port = rand()%65536;
     uint32_t My_Sequence_Number = (rand()%10000)+1;
     char ReceivingBUF[UDP_MAX];
@@ -80,7 +81,9 @@ int main(int argc , char ** argv){
     }
     else{
         charToTcp(RecvingPacket,ReceivingBUF);
+        server_s_sequence_number = RecvingPacket.Sequence_Number;
         if(Debug_Displaying_Packet){
+            cout<<"Receving Packet:\n";
             displayPacket(RecvingPacket);
         }
     }
@@ -92,6 +95,7 @@ int main(int argc , char ** argv){
     SendingPacket.SYN                  =   0;
     SendingPacket.ACK                  =   1;
     if(Debug_Displaying_Packet){
+        cout<<"Sending Packet:\n";
         displayPacket(SendingPacket);
     }
     makePacket(SendingPacket,SendingBUF,UDP_MAX);
@@ -108,6 +112,7 @@ int main(int argc , char ** argv){
     SendingPacket.SYN                  =   0;
     SendingPacket.ACK                  =   1;
     if(Debug_Displaying_Packet){
+        cout<<"Sending Packet:\n";
         displayPacket(SendingPacket);
     }
     makePacket(SendingPacket,SendingBUF,UDP_MAX);
@@ -117,6 +122,7 @@ int main(int argc , char ** argv){
     
     //requesting file !!
     for(int i = 0 ;i <atoi(argv[index_File]);i++){
+        int fd;
         cout<<"requesting\t"<<argv[index_File+i+1]<<"\n";
         SendingPacket.Source_Port          =   My_Source_Port;
         //cout<<"My source port:"<<My_Source_Port<<"\n";
@@ -136,17 +142,24 @@ int main(int argc , char ** argv){
         SendingBUF[23]                     = 0;
         
         memcpy(SendingBUF+24,argv[index_File+i+1],strlen(argv[index_File+i+1]));         //50 for the length of the file is enough i think
+        memset(SendingBUF+24+strlen(argv[index_File+i+1]),0,100);
         if(sendto(socketFd, SendingBUF, sizeof(SendingBUF), 0, (const struct sockaddr *) &client, sizeof(client))<0){
             perror("send error!");
         }
         /**
          *      here are missing some code to open file to write 
-         * 
+         *      making in 150-154
          * 
          * 
          * 
         */
+        fd = open(argv[index_File+i+1],O_CREAT|O_RDWR);
+        if(fd == -1){
+            perror("creating or opening file error\n");
+            exit(1);
+        }
         int endOfFile_Indicator = 0;
+        uint32_t size_of_this_tranmission = 0;
         while(!endOfFile_Indicator){
             if(recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
                 perror("recv error!");
@@ -154,13 +167,19 @@ int main(int argc , char ** argv){
             else{
                 charToTcp(RecvingPacket,ReceivingBUF);
                 if(Debug_Displaying_Packet){
+                    cout<<"Receving Packet:\n";
                     displayPacket(RecvingPacket);
+                    //cout<<"return from request\n";
+                    if()
                 }
                 if(RecvingPacket.Data_Offset!=20){  //means it might not a regular data packet
                                                     //but consider that if the udp transport separate the TCP packet , so we also need an indicator of that situation
+                    //cout<<"well didn't go well "<<ReceivingBUF[20]<<"\n";
                     if(int(ReceivingBUF[20])==2){
                         //preparing to close the file
+                        close(fd);
                         endOfFile_Indicator = 1;
+                        break;
                         //close file
                     }
                     else if(int(ReceivingBUF[20])==3){
@@ -168,8 +187,16 @@ int main(int argc , char ** argv){
                     }
                     else if(int(ReceivingBUF[20])==6){
                         //a bad file request // maybe the file is not exist
+                        cout<<"bad request exiting\n";
+                        exit(6);
                     }
                 }
+                size_of_this_tranmission = RecvingPacket.Sequence_Number - server_s_sequence_number;
+                size_of_this_tranmission -= RecvingPacket.Data_Offset;
+                server_s_sequence_number = RecvingPacket.Sequence_Number;
+                write(fd,ReceivingBUF+RecvingPacket.Data_Offset,size_of_this_tranmission);
+                cout<<"receving: "<<size_of_this_tranmission<<" bytes\n";
+                //cout<<"the message: "<<ReceivingBUF[RecvingPacket.Data_Offset]<<"\n";
                 /*
                 *   write the file
                 * 
@@ -177,7 +204,21 @@ int main(int argc , char ** argv){
                 * 
                 * 
                 */
-
+                SendingPacket.Source_Port          =   My_Source_Port;
+                SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
+                SendingPacket.Sequence_Number      =   ++My_Sequence_Number;
+                SendingPacket.Ack_Number           =   server_s_sequence_number+1;
+                SendingPacket.Data_Offset          =   20;
+                SendingPacket.SYN                  =   0;
+                SendingPacket.ACK                  =   1;
+                if(Debug_Displaying_Packet){
+                    cout<<"Sending Packet:\n";
+                    displayPacket(SendingPacket);
+                }
+                makePacket(SendingPacket,SendingBUF,UDP_MAX);
+                if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
+                    perror("send error!");
+                }
             }
         }
     }

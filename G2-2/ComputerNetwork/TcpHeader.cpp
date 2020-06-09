@@ -111,3 +111,18 @@ void displayPacket(const struct TcpHEADER Header){
     printf("%4d%d%d%d%d%d%d%d%d%d%d%d%d%16ld\n",Header.Data_Offset,0,0,0,Header.NS,Header.CWR,Header.ECE,Header.URG,Header.ACK,Header.PSH,Header.RST,Header.SYN,Header.FIN,Header.Window_Size);
     printf("%16ld%16ld\n",Header.CheckSum,Header.Urgent_Pointer);
 }
+
+int checkSum(const char * Packet_PTR ,const ssize_t packet_size , struct TcpHEADER  & Header , int operation){
+    uint16_t checksum = 0;
+    for(int i = 0 ; i < packet_size/2 ; i++){
+        checksum+= (Packet_PTR[i]<<8) + (Packet_PTR[i+1]);
+    }
+    if(packet_size%2 == 1){
+        checksum += Packet_PTR[packet_size-1];
+    }
+    std::cout<<"checksum is"<<checksum<<"\n";
+    if(operation){
+        Header.CheckSum = checksum;
+    }
+    return Header.CheckSum == checksum;
+}

@@ -19,6 +19,7 @@ struct PassingToThread{
     bool                SackOption;
     uint32_t            My_Sequence_Number;
     int                 sockFd_PTH;
+    struct sockaddr_in  *   client;
 };
 
 struct unpackOption{

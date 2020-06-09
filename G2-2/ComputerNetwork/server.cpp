@@ -55,6 +55,7 @@ int main(int argc , char ** argv){
     vector<struct PassingToThread *> Server_Pthread_List;
 
     while(1){
+        //cout<<"hello\n";
         if ((recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&client, (socklen_t *)&length)) <0) {
             perror ("recv error!");
             continue;
@@ -68,7 +69,7 @@ int main(int argc , char ** argv){
                 displayPacket(ReceivingPacket);
             }
             if(ReceivingPacket.SYN == 1){ //a client want to estab a connection
-                cout<<"hi SYNC here\n";
+                //cout<<"hi SYNC here\n";
                 struct Bind DataBind;
                 int FindSameBind = 0;
                 DataBind.ClientIp   = client.sin_addr.s_addr;
@@ -83,7 +84,7 @@ int main(int argc , char ** argv){
 
                 if(!FindSameBind){
                     //send back ack for init connection
-                    cout<<"first sync\n";
+                    //cout<<"first sync\n";
                     ListBindPending.push_back(DataBind);
                     SendingPacket.Source_Port        =   ReceivingPacket.Destination_Port;
                     SendingPacket.Destination_Port   =   ReceivingPacket.Source_Port;
@@ -144,7 +145,7 @@ int main(int argc , char ** argv){
                     //so we need to create socket for handling the situation and send file
                     //how to transfer the file? using the receiving header?
                     //but is the data important
-                    cout<<"after bind\n";
+                    //cout<<"after bind\n";
                     int index_Server_Pthread_List = -1;
                     for(int i = 0 ; i < Server_Pthread_List.size();i++){
                         if(Server_Pthread_List[i]->Bind_data.ClientIp == DataBind.ClientIp && Server_Pthread_List[i]->Bind_data.ClientPort == DataBind.ClientPort){
@@ -153,16 +154,29 @@ int main(int argc , char ** argv){
                     }
                     if(index_Server_Pthread_List != -1){
                         //well just cond wake the pthread
+                        //cout<<"am i stuck in here?\n";
                         Server_Pthread_List[index_Server_Pthread_List]->Bind_data.Packet_Size    = ReceivingPacket.Sequence_Number - ListBindDone[FindSameBindDoneIndex].Last_Sequence;
                         Server_Pthread_List[index_Server_Pthread_List]->Bind_data.Last_Sequence  = ReceivingPacket.Sequence_Number;
                         Server_Pthread_List[index_Server_Pthread_List]->readOK                   = 0;
                         Server_Pthread_List[index_Server_Pthread_List]->ReceivingBUF_PTH         = ReceivingBUF;
                         Server_Pthread_List[index_Server_Pthread_List]->ReceivingPacket          = ReceivingPacket;
                         pthread_cond_signal(&(Server_Pthread_List[index_Server_Pthread_List]->cond_signal));
-                        while(!(Server_Pthread_List[index_Server_Pthread_List]->readOK));
+                        while(1){
+                            //cout<<"i should \n";
+                            if((Server_Pthread_List[index_Server_Pthread_List]->readOK) == 1){
+                                break;
+                            }
+                            else if((Server_Pthread_List[index_Server_Pthread_List]->readOK) == -1){
+                                cout<<"exiting thread\n";
+                                pthread_detach(Server_Pthread_List[index_Server_Pthread_List]->tid);
+                                Server_Pthread_List.erase(Server_Pthread_List.begin()+index_Server_Pthread_List);
+                                //sleep(1);
+                                break;
+                            }
+                        }
                     }
                     else{       //only if the client is not found in the pthread list, create the pthread
-                        cout<<"hi\n";
+                        //cout<<"hi\n";
                         //necessity of inner two if statement?
                         if(ReceivingPacket.Data_Offset!=20 && ReceivingBUF[20]==1){    //still has a chance of two prosability :
                                                                 //1.ack or sack need to check!!!           , but we will ignore this and hand it to the thread
@@ -182,6 +196,8 @@ int main(int argc , char ** argv){
                             SendToPthread->SendingBUF_PTH           = SendingBUF;
                             SendToPthread->SendingPacket            = SendingPacket;
                             SendToPthread->sockFd_PTH               = socketFd;
+                            SendToPthread->client                   = &client;
+                            SendToPthread->My_Sequence_Number       = My_Sequence_Number;
                             pthread_create(&(SendToPthread->tid),NULL,server_thread,SendToPthread);
                             usleep(500);
                             pthread_cond_signal(&(SendToPthread->cond_signal));
@@ -211,7 +227,7 @@ int main(int argc , char ** argv){
                     }
                 }
                 else{
-                    cout<<"210\n";
+                    cout<<"230\n";
                 }
 
 

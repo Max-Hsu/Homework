@@ -7,6 +7,7 @@
 #define UDP_MAX         64000
 #define Buffer_Size 512 *1000
 #define Debug_Displaying_Packet 1
+#define CheckSUM        1
 struct TcpHEADER{
     uint16_t        Source_Port;
     uint16_t        Destination_Port;
@@ -50,4 +51,5 @@ template <class T>
 void bitToChar(const T & data, char * ptrOfChar,size_t offset);
 void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size);
 void displayPacket(const struct TcpHEADER Header);
+int checkSum(const char * Packet_PTR ,const ssize_t packet_size , struct TcpHEADER  & Header , int operation);
 #endif
