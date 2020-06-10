@@ -66,6 +66,7 @@ int main(int argc , char ** argv){
             struct TcpHEADER SendingPacket;
             charToTcp(ReceivingPacket,ReceivingBUF);
             if(Debug_Displaying_Packet){
+                cout<<"Receving Packet:\n";
                 displayPacket(ReceivingPacket);
             }
             if(ReceivingPacket.SYN == 1){ //a client want to estab a connection

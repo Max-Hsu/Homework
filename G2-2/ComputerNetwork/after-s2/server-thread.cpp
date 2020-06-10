@@ -45,6 +45,7 @@ void * server_thread(void * args){
                     here->SendingPacket.Sequence_Number    =   here->My_Sequence_Number+24;
                     here->SendingPacket.Data_Offset        =   24;
                     here->SendingPacket.ACK                =   0;
+                    here->SendingPacket.CheckSum           =   0;
                     makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
                     here->SendingBUF_PTH [20] = 6;
                     here->SendingBUF_PTH [21] = 0;
@@ -72,15 +73,17 @@ void * server_thread(void * args){
             */
             here->SendingPacket.Source_Port        =   here->ReceivingPacket.Destination_Port;
             here->SendingPacket.Destination_Port   =   here->ReceivingPacket.Source_Port;
-            here->SendingPacket.Sequence_Number    =   (here->My_Sequence_Number)+24+cwnd;
-            here->My_Sequence_Number+= (24+cwnd);
+            here->SendingPacket.Sequence_Number    =   (here->My_Sequence_Number)+24;
+            here->My_Sequence_Number+= (24);
             here->SendingPacket.Data_Offset        =   24;
             here->SendingPacket.ACK                =   0;
             here->SendingBUF_PTH[20]               =   2;
             here->SendingBUF_PTH[21]               =   0;
             here->SendingBUF_PTH[22]               =   0;
             here->SendingBUF_PTH[23]               =   0;
+            here->SendingPacket.CheckSum           =   0;
             makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
+            checkSum(here->SendingBUF_PTH,24,here->SendingPacket,1);
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 24, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
             }
@@ -107,6 +110,7 @@ void * server_thread(void * args){
             here->My_Sequence_Number+= (20+actual_can_read);
             here->SendingPacket.Data_Offset        =   20;
             here->SendingPacket.ACK                =   0;
+            here->SendingPacket.CheckSum           =   0;
             makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
             memcpy(((here->SendingBUF_PTH)+20),requestingBUF,actual_can_read);
             //cout<<"sending "<<here->SendingBUF_PTH[20]<<"\n";
@@ -114,6 +118,12 @@ void * server_thread(void * args){
 
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 20+actual_can_read, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
+            }
+            charToTcp(here->SendingPacket,here->SendingBUF_PTH);
+            if(Debug_Displaying_Packet){
+                cout<<"Sending Packet:\n";
+                displayPacket(here->SendingPacket);
+                //cout<<"return from request\n";
             }
             cwnd = cwnd*2 < my_Threshold ? cwnd*2 : cwnd;
         }

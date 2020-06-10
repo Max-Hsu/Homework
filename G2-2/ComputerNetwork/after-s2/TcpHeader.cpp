@@ -114,16 +114,21 @@ void displayPacket(const struct TcpHEADER Header){
 
 int checkSum(char * Packet_PTR ,const ssize_t packet_size , struct TcpHEADER  & Header , int operation){
     uint16_t checksum = 0;
-    for(int i = 0 ; i < packet_size/2 ; i++){
+    for(int i = 0 ; i < packet_size ; i+=2){
+        if(operation == 0 && i ==16){
+            continue;
+        }
         checksum+= (Packet_PTR[i]<<8) + (Packet_PTR[i+1]);
+        //std::cout<<"checksum : "<<i<<"\t"<<checksum<<"\n";
     }
     if(packet_size%2 == 1){
-        checksum += Packet_PTR[packet_size-1];
+        checksum += Packet_PTR[packet_size-1]<<8;
     }
-    std::cout<<"checksum is"<<checksum<<"\n";
+    std::cout<<"checksum is "<<checksum<<"\n";
     if(operation == 1){
         Header.CheckSum = checksum;
         typeToChar  (Header.CheckSum, Packet_PTR+16);
     }
+
     return Header.CheckSum == checksum;
 }
