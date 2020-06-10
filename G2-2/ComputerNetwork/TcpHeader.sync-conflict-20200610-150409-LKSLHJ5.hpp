@@ -51,5 +51,5 @@ template <class T>
 void bitToChar(const T & data, char * ptrOfChar,size_t offset);
 void makePacket(const struct TcpHEADER Header , char * packetChar , size_t size);
 void displayPacket(const struct TcpHEADER Header);
-int checkSum(char * Packet_PTR ,const ssize_t packet_size , struct TcpHEADER  & Header , int operation);
+int checkSum(const char * Packet_PTR ,const ssize_t packet_size , struct TcpHEADER  & Header , int operation);
 #endif

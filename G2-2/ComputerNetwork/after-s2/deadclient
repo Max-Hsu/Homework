@@ -172,54 +172,67 @@ int main(int argc , char ** argv){
                     //cout<<"return from request\n";
                     
                 }
-                
-                if(RecvingPacket.Data_Offset!=20){  //means it might not a regular data packet
-                                                    //but consider that if the udp transport separate the TCP packet , so we also need an indicator of that situation
-                    //cout<<"well didn't go well "<<ReceivingBUF[20]<<"\n";
-                    if(int(ReceivingBUF[20])==2){
-                        //preparing to close the file
-                        close(fd);
-                        server_s_sequence_number = RecvingPacket.Sequence_Number;
-                        endOfFile_Indicator = 1;
-                        break;
-                        //close file
-                    }
-                    else if(int(ReceivingBUF[20])==3){
-                        //just ignore and concat the file
-                    }
-                    else if(int(ReceivingBUF[20])==6){
-                        //a bad file request // maybe the file is not exist
-                        cout<<"bad request exiting\n";
-                        exit(6);
-                    }
-                }
                 size_of_this_tranmission = RecvingPacket.Sequence_Number - server_s_sequence_number;
                 size_of_this_tranmission -= RecvingPacket.Data_Offset;
                 server_s_sequence_number = RecvingPacket.Sequence_Number;
-                write(fd,ReceivingBUF+RecvingPacket.Data_Offset,size_of_this_tranmission);
-                cout<<"receving: "<<size_of_this_tranmission<<" bytes\n";
-                //cout<<"the message: "<<ReceivingBUF[RecvingPacket.Data_Offset]<<"\n";
-                /*
-                *   write the file
-                * 
-                * 
-                * 
-                * 
-                */
-                SendingPacket.Source_Port          =   My_Source_Port;
-                SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
-                SendingPacket.Sequence_Number      =   ++My_Sequence_Number;
-                SendingPacket.Ack_Number           =   server_s_sequence_number+1;
-                SendingPacket.Data_Offset          =   20;
-                SendingPacket.SYN                  =   0;
-                SendingPacket.ACK                  =   1;
-                if(Debug_Displaying_Packet){
-                    cout<<"Sending Packet:\n";
-                    displayPacket(SendingPacket);
+                if(checkSum(ReceivingBUF,size_of_this_tranmission,RecvingPacket,0)){
+                    if(RecvingPacket.Data_Offset!=20){  //means it might not a regular data packet
+                                                        //but consider that if the udp transport separate the TCP packet , so we also need an indicator of that situation
+                        //cout<<"well didn't go well "<<ReceivingBUF[20]<<"\n";
+                        if(int(ReceivingBUF[20])==2){
+                            //preparing to close the file
+                            close(fd);
+                            server_s_sequence_number = RecvingPacket.Sequence_Number;
+                            endOfFile_Indicator = 1;
+                            break;
+                            //close file
+                        }
+                        else if(int(ReceivingBUF[20])==3){
+                            //just ignore and concat the file
+                        }
+                        else if(int(ReceivingBUF[20])==6){
+                            //a bad file request // maybe the file is not exist
+                            cout<<"bad request exiting\n";
+                            exit(6);
+                        }
+                    }
+                    write(fd,ReceivingBUF+RecvingPacket.Data_Offset,size_of_this_tranmission);
+                    cout<<"receving: "<<size_of_this_tranmission<<" bytes\n";
+                    //cout<<"the message: "<<ReceivingBUF[RecvingPacket.Data_Offset]<<"\n";
+                    /*
+                    *   write the file
+                    * 
+                    * 
+                    * 
+                    * 
+                    */
+                    SendingPacket.Source_Port          =   My_Source_Port;
+                    SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
+                    SendingPacket.Sequence_Number      =   ++My_Sequence_Number;
+                    SendingPacket.Ack_Number           =   server_s_sequence_number+1;
+                    SendingPacket.Data_Offset          =   20;
+                    SendingPacket.SYN                  =   0;
+                    SendingPacket.ACK                  =   1;
+                    if(Debug_Displaying_Packet){
+                        cout<<"Sending Packet:\n";
+                        displayPacket(SendingPacket);
+                    }
+                    makePacket(SendingPacket,SendingBUF,UDP_MAX);
+                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
+                        perror("send error!");
+                    }
                 }
-                makePacket(SendingPacket,SendingBUF,UDP_MAX);
-                if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
-                    perror("send error!");
+                else{
+                    cout<<"checkSum error\n";
+                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
+                        perror("send error!");
+                    }
+                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
+                        perror("send error!");
+                    }
+                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
+                        perror("send error!");
+                    }
                 }
             }
         }

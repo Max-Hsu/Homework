@@ -29,6 +29,7 @@ void * server_thread(void * args){
         //cout<<"thread open\n";
         int fd;
         int init_i = 1;
+        ssize_t actual_can_read = (file_size-accumulate_size) < cwnd ? (file_size-accumulate_size): cwnd;
         uint32_t my_Threshold = Threshold;
         ssize_t file_read_size;
         
@@ -62,7 +63,6 @@ void * server_thread(void * args){
             file_size = stat_file.st_size;
             cout<<"the file is "<<file_size<<" large\n";
         }
-        ssize_t actual_can_read = (file_size-accumulate_size) < cwnd ? (file_size-accumulate_size): cwnd;
 
 
         if(accumulate_size == file_size){
@@ -95,7 +95,7 @@ void * server_thread(void * args){
             
             */
             init_i = 0;
-            cout<<"sending "<<actual_can_read<<" bytes\n";
+            
             file_read_size = read(fd,requestingBUF,actual_can_read);
             accumulate_size += actual_can_read;
             cout<<"cwnd : "<<cwnd<<" rwnd : "<<here->ReceivingPacket.Window_Size<<" Threshold : "<<my_Threshold<<"\n";
@@ -110,8 +110,6 @@ void * server_thread(void * args){
             makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
             memcpy(((here->SendingBUF_PTH)+20),requestingBUF,actual_can_read);
             //cout<<"sending "<<here->SendingBUF_PTH[20]<<"\n";
-            checkSum(here->SendingBUF_PTH,20+actual_can_read,here->SendingPacket,1);
-
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 20+actual_can_read, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
             }
