@@ -160,6 +160,7 @@ int main(int argc , char ** argv){
         }
         int endOfFile_Indicator = 0;
         uint32_t size_of_this_tranmission = 0;
+	int two_packet = 0;
         while(!endOfFile_Indicator){
             if(recvfrom(socketFd, &ReceivingBUF, UDP_MAX, 0, (struct sockaddr*)&server, (socklen_t *)&length)<0){
                 perror("recv error!");
@@ -172,42 +173,43 @@ int main(int argc , char ** argv){
                     //cout<<"return from request\n";
                     
                 }
+                
+                if(RecvingPacket.Data_Offset!=20){  //means it might not a regular data packet
+                                                    //but consider that if the udp transport separate the TCP packet , so we also need an indicator of that situation
+                    //cout<<"well didn't go well "<<ReceivingBUF[20]<<"\n";
+                    if(int(ReceivingBUF[20])==2){
+                        //preparing to close the file
+                        close(fd);
+                        server_s_sequence_number = RecvingPacket.Sequence_Number;
+                        endOfFile_Indicator = 1;
+                        break;
+                        //close file
+                    }
+                    else if(int(ReceivingBUF[20])==3){
+                        //just ignore and concat the file
+                    }
+                    else if(int(ReceivingBUF[20])==6){
+                        //a bad file request // maybe the file is not exist
+                        cout<<"bad request exiting\n";
+                        exit(6);
+                    }
+                }
                 size_of_this_tranmission = RecvingPacket.Sequence_Number - server_s_sequence_number;
                 size_of_this_tranmission -= RecvingPacket.Data_Offset;
                 server_s_sequence_number = RecvingPacket.Sequence_Number;
+                write(fd,ReceivingBUF+RecvingPacket.Data_Offset,size_of_this_tranmission);
                 cout<<"receving: "<<size_of_this_tranmission<<" bytes\n";
-                cout<<"extrating "<<size_of_this_tranmission+RecvingPacket.Data_Offset<<"\n";
-                if(checkSum(ReceivingBUF,(size_of_this_tranmission+RecvingPacket.Data_Offset),RecvingPacket,0)){
-                    if(RecvingPacket.Data_Offset!=20){  //means it might not a regular data packet
-                                                        //but consider that if the udp transport separate the TCP packet , so we also need an indicator of that situation
-                        //cout<<"well didn't go well "<<ReceivingBUF[20]<<"\n";
-                        if(int(ReceivingBUF[20])==2){
-                            //preparing to close the file
-                            close(fd);
-                            server_s_sequence_number = RecvingPacket.Sequence_Number;
-                            endOfFile_Indicator = 1;
-                            break;
-                            //close file
-                        }
-                        else if(int(ReceivingBUF[20])==3){
-                            //just ignore and concat the file
-                        }
-                        else if(int(ReceivingBUF[20])==6){
-                            //a bad file request // maybe the file is not exist
-                            cout<<"bad request exiting\n";
-                            exit(6);
-                        }
-                    }
-                    write(fd,ReceivingBUF+RecvingPacket.Data_Offset,size_of_this_tranmission);
-                    //cout<<"receving: "<<size_of_this_tranmission<<" bytes\n";
-                    //cout<<"the message: "<<ReceivingBUF[RecvingPacket.Data_Offset]<<"\n";
-                    /*
-                    *   write the file
-                    * 
-                    * 
-                    * 
-                    * 
-                    */
+                two_packet +=1;
+		//cout<<"the message: "<<ReceivingBUF[RecvingPacket.Data_Offset]<<"\n";
+                /*
+                *   write the file
+                * 
+                * 
+                * 
+                * 
+                *///pick me and remember to tab the rest of the code
+                if(two_packet==2){
+                    two_packet = 0;
                     SendingPacket.Source_Port          =   My_Source_Port;
                     SendingPacket.Destination_Port     =   atoi(argv[index_Port]);
                     SendingPacket.Sequence_Number      =   ++My_Sequence_Number;
@@ -224,19 +226,7 @@ int main(int argc , char ** argv){
                         perror("send error!");
                     }
                 }
-                else{
-                    cout<<"checkSum error\n";
-                    exit(1);
-                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
-                        perror("send error!");
-                    }
-                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
-                        perror("send error!");
-                    }
-                    if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
-                        perror("send error!");
-                    }
-                }
+		//to here!!!!
             }
         }
     }

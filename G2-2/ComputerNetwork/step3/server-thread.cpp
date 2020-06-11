@@ -24,6 +24,7 @@ void * server_thread(void * args){
     ssize_t file_size = 0;
     ssize_t accumulate_size = 0;
     int cwnd = 1;
+    //vector<char * > TcpSendingPacket;
     while(1){
         pthread_cond_wait(&(here->cond_signal),&(here->lock));
         //cout<<"thread open\n";
@@ -97,6 +98,10 @@ void * server_thread(void * args){
                 let's just first test if the tranmission work
             
             */
+            //right now the problem is more about checking the acks
+            //how do i do?
+            //init a new vector for checking?
+
             init_i = 0;
             cout<<"sending "<<actual_can_read<<" bytes\n";
             file_read_size = read(fd,requestingBUF,actual_can_read);
