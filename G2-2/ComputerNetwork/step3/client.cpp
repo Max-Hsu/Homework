@@ -226,7 +226,7 @@ int main(int argc , char ** argv){
                 }
                 else{
                     cout<<"checkSum error\n";
-                    //exit(1);
+                    exit(1);
                     if(sendto(socketFd, SendingBUF, 21, 0, (const struct sockaddr *) &client, sizeof(client))<0){
                         perror("send error!");
                     }

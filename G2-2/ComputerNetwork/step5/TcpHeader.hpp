@@ -3,7 +3,7 @@
 
 #define RTT 15
 #define MSS 1           *1000
-#define Threshold 64    *1000
+#define Threshold 64    *1
 #define UDP_MAX         64000
 #define Buffer_Size 512 *1000
 #define Debug_Displaying_Packet 1

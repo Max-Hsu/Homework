@@ -18,3 +18,6 @@ clean:
 dep:
 	$(CC)	$(CFLAGS)	server.cpp	-MM	>	server.dep
 	$(CC)	$(CFLAGS)	client.cpp	-MM	>	client.dep
+.PHONY:clientclean
+clientclean:
+	-rm -f *.mp4

@@ -24,6 +24,7 @@ void * server_thread(void * args){
     ssize_t file_size = 0;
     ssize_t accumulate_size = 0;
     int cwnd = 1;
+    int ATrigger = Trigger;
     //vector<char * > TcpSendingPacket;
     while(1){
         pthread_cond_wait(&(here->cond_signal),&(here->lock));
@@ -120,7 +121,12 @@ void * server_thread(void * args){
             memcpy(((here->SendingBUF_PTH)+20),requestingBUF,actual_can_read);
             //cout<<"sending "<<here->SendingBUF_PTH[20]<<"\n";
             checkSum(here->SendingBUF_PTH,20+actual_can_read,here->SendingPacket,1);
-
+            if(ATrigger){
+                if(accumulate_size>TriggerTo){
+                    memset(here->SendingBUF_PTH,rand()%256,1);
+                    ATrigger = 0;
+                }
+            }
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 20+actual_can_read, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
             }

@@ -115,7 +115,15 @@ void * server_thread(void * args){
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 20+actual_can_read, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
             }
-            cwnd = cwnd*2 < my_Threshold ? cwnd*2 : cwnd;
+            //cwnd = cwnd*2 < my_Threshold ? cwnd*2 : cwnd;
+            if(cwnd < my_Threshold){
+                cwnd = cwnd * 2;
+                cout<<"slow starting "<<cwnd<<"\n";
+            }
+            else{
+                cwnd = cwnd+MSS*(MSS/cwnd);
+                cout<<"cogestion avoidance "<<cwnd<<"\n";
+            }
         }
         here->readOK = 1;
         //sleep(1);
