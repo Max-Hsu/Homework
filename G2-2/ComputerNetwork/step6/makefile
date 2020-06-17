@@ -8,7 +8,6 @@ server-thread:
 	$(CC)	$(CFLAGS)	-c	server-thread.cpp TcpHeader.o
 server:
 	$(CC)	$(CFLAGS)	-c	server.cpp
-	$(CC)	$(CFLAGS)	-o 	server	server-thread.o	TcpHeader.o	
 	$(CC)	$(CFLAGS)	-o 	server	server.o	TcpHeader.o	server-thread.o
 client:
 	$(CC)	$(CFLAGS)	-c	client.cpp

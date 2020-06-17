@@ -75,6 +75,8 @@ void typeToChar(const T & data, char * destptrOfChar){
     //std::cout<<"\n";
 }
 
+
+
 template <class T>
 void bitToChar(const T & data, char * ptrOfChar,size_t offset){
     std::bitset<8> Tmp(ptrOfChar[0]);

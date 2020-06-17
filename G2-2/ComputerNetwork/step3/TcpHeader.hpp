@@ -8,7 +8,7 @@
 #define Buffer_Size 512 *1000
 #define Debug_Displaying_Packet 1
 #define CheckSUM        1
-#define Trigger         0
+#define Trigger         1
 #define TriggerTo       8192
 struct TcpHEADER{
     uint16_t        Source_Port;

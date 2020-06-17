@@ -9,8 +9,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "TcpHeader.hpp"
+#include <bitset>
 using namespace std;
-
+void AcharToType(long & dest,const char * ptrOfChar,size_t sizeOfBytes);
 int main(int argc , char ** argv){
     srand(time(NULL));
     int index_IP;
@@ -256,8 +257,10 @@ int main(int argc , char ** argv){
                                     //preparing to close the file
                                     server_s_sequence_number = RecvingPacket.Sequence_Number;
                                     ssize_t RewindFD;
-                                    charToType(RewindFD,ReceivingBUF+RecvingPacket.Data_Offset,sizeof(RewindFD));
+                                    AcharToType(RewindFD,ReceivingBUF+RecvingPacket.Data_Offset,sizeof(RewindFD));
                                     lseek(fd,RewindFD,SEEK_SET);
+                                    OOPS_checker = 0;
+                                    cout<<"bybybyb\n";
                                 }
                             }
                         }
@@ -267,4 +270,18 @@ int main(int argc , char ** argv){
         }
     }
 
+}
+
+
+
+void AcharToType(long & dest,const char * ptrOfChar,size_t sizeOfBytes){
+    bitset<8*sizeof(long)> tmpOfWhole;
+    for(int i = 0 ; i < sizeof(long) ; i++){
+        bitset<8> tmpOfByte(ptrOfChar[i]);
+        for(int j=7 ; j>=0 ;j--){
+            tmpOfWhole[8*(sizeof(long)-1-i)+j] = tmpOfByte[j];
+        }
+    }
+    //std::cout<<tmpOfWhole.to_string()<<"\n";
+    dest = tmpOfWhole.to_ullong();
 }

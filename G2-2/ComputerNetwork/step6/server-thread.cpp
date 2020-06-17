@@ -11,9 +11,10 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
+#include <bitset>
 using namespace std;
 
+void AtypeToChar(long & data, char * destptrOfChar);
 void * server_thread(void * args){
     struct PassingToThread * here = (PassingToThread *) args;
     char requestingBUF [UDP_MAX];
@@ -66,7 +67,7 @@ void * server_thread(void * args){
         }
         ssize_t actual_can_read = (file_size-accumulate_size) < cwnd ? (file_size-accumulate_size): cwnd;
 
-
+        //cout<<"why file"<<file_size<<"\t"<<accumulate_size<<"\n";
         if(accumulate_size == file_size){
             /**
              * 
@@ -74,15 +75,17 @@ void * server_thread(void * args){
             */
             here->SendingPacket.Source_Port        =   here->ReceivingPacket.Destination_Port;
             here->SendingPacket.Destination_Port   =   here->ReceivingPacket.Source_Port;
-            here->SendingPacket.Sequence_Number    =   (here->My_Sequence_Number)+24+cwnd;
-            here->My_Sequence_Number+= (24+cwnd);
+            here->SendingPacket.Sequence_Number    =   (here->My_Sequence_Number)+24;
+            here->My_Sequence_Number+= (24);
             here->SendingPacket.Data_Offset        =   24;
             here->SendingPacket.ACK                =   0;
             here->SendingBUF_PTH[20]               =   2;
             here->SendingBUF_PTH[21]               =   0;
             here->SendingBUF_PTH[22]               =   0;
             here->SendingBUF_PTH[23]               =   0;
+            here->SendingPacket.CheckSum           =   0;
             makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
+            checkSum(here->SendingBUF_PTH,24,here->SendingPacket,1);
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 24, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
             }
@@ -103,7 +106,7 @@ void * server_thread(void * args){
             A.accumulate_size = 0;
             Recvining_Packet_ACK_CHECK.push_back(A);
             int temp_accumulate = -1;
-            for(int i = 0 ; i< Recvining_Packet_ACK_CHECK.size();i++){
+            for(int i = 0 ; i< Recvining_Packet_ACK_CHECK.size()-1;i++){
                 if( Recvining_Packet_ACK_CHECK[i].RECEVING_PACKET.Ack_Number == here->ReceivingPacket.Ack_Number){
                     Fast_retranmission_id +=1;
                     temp_accumulate = Recvining_Packet_ACK_CHECK[i].accumulate_size;
@@ -115,9 +118,9 @@ void * server_thread(void * args){
                 cwnd = sizeof(ssize_t);
                 accumulate_size = temp_accumulate;
                 lseek(fd,accumulate_size,SEEK_SET);
-                cout<<"temp accu"<<temp_accumulate<<"\n";
+                //cout<<"temp accu"<<temp_accumulate<<"\n";
 
-                Recvining_Packet_ACK_CHECK.erase(Recvining_Packet_ACK_CHECK.begin(),Recvining_Packet_ACK_CHECK.end());
+                
 
                 here->SendingPacket.Source_Port        =   here->ReceivingPacket.Destination_Port;
                 here->SendingPacket.Destination_Port   =   here->ReceivingPacket.Source_Port;
@@ -130,11 +133,12 @@ void * server_thread(void * args){
                 here->SendingBUF_PTH[22]               =   0;
                 here->SendingBUF_PTH[23]               =   0;
                 makePacket(here->SendingPacket,here->SendingBUF_PTH,UDP_MAX);
-                typeToChar(accumulate_size,(here->SendingBUF_PTH+24)); //unknown reason that it couldn't
+                AtypeToChar(accumulate_size,(here->SendingBUF_PTH+24)); //unknown reason that it couldn't
 
                 if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 24+sizeof(ssize_t), 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                     perror("send error!");
                 }
+                cwnd = 1;
                 actual_can_read = (file_size-accumulate_size) < cwnd ? (file_size-accumulate_size): cwnd;
             }
             
@@ -148,6 +152,7 @@ void * server_thread(void * args){
             //cout<<"the answer is: "<<actual_can_read<<"\n";//(((file_size - accumulate_size) < cwnd) ? (here->My_Sequence_Number)+(file_size-accumulate_size+20):(here->My_Sequence_Number)+20+cwnd)<<"\n";
             
             here->My_Sequence_Number+= (20+actual_can_read);
+            //cout<<"My SEQ:"<<here->My_Sequence_Number<<"\n";
             here->SendingPacket.Data_Offset        =   20;
             here->SendingPacket.ACK                =   0;
             here->SendingPacket.CheckSum           =   0;
@@ -162,12 +167,29 @@ void * server_thread(void * args){
                     ATrigger = 0;
                 }
             }
+            cout<<"sendingChecking\n";
+            if(Debug_Displaying_Packet){
+                cout<<"Sending Packet:\n";
+                displayPacket(here->SendingPacket);
+            }
             if(sendto(here->sockFd_PTH, here->SendingBUF_PTH, 20+actual_can_read, 0, (const struct sockaddr *) here->client, sizeof(*(here->client)))<0){
                 perror("send error!");
             }
-            cwnd = cwnd*2 < my_Threshold ? cwnd*2 : cwnd;
+            if(cwnd < my_Threshold){
+                cwnd = cwnd * 2;
+                if(cwnd>UDP_MAX){
+                    cwnd = UDP_MAX;
+                }
+                cout<<"slow starting "<<cwnd<<"\n";
+            }
+            else{
+                cwnd = cwnd+MSS*(MSS/cwnd);
+                cout<<"cogestion avoidance "<<cwnd<<"\n";
+            }
             Recvining_Packet_ACK_CHECK[Recvining_Packet_ACK_CHECK.size()-1].accumulate_size = accumulate_size;
-            
+            if(Fast_retranmission_id>=3){
+                Recvining_Packet_ACK_CHECK.clear();
+            }
         }
         here->readOK = 1;
         //sleep(1);
@@ -210,3 +232,17 @@ int main(){
     sleep(1);
     cout<<"bye\n";
 } */
+
+
+
+void AtypeToChar(long & data, char * destptrOfChar){
+    bitset<sizeof(long)*8> tmpOfWhole (data);
+    for(int i=sizeof(long)-1;i>=0;i--){
+        bitset<8> tmpOfByte;
+        for(int j=7;j>=0;j--){
+            tmpOfByte[j] = tmpOfWhole[i*8+j];
+            //std::cout<<tmpOfByte[j];
+        }
+        destptrOfChar[(sizeof(long)-1-i)] = tmpOfByte.to_ulong();
+    }
+}
